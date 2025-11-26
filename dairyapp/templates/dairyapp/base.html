@@ -1,0 +1,143 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Bootstrap CSS -->
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/bootstrap-theme.css' %}" rel="stylesheet">
+
+    <!-- Font Awesome CDN (Latest Version) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <!-- Custom CSS -->
+    <link href="{% static 'css/widgets.css' %}" rel="stylesheet">
+    <link href="{% static 'css/style.css' %}" rel="stylesheet">
+    <link href="{% static 'css/style-responsive.css' %}" rel="stylesheet">
+    <link href="{% static 'css/xcharts.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/jquery-ui-1.10.4.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/nepali.datepicker.v2.2.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/datatables.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/jquery.dataTables.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/buttons.dataTables.min.css' %}" rel="stylesheet">
+
+    <!-- jQuery -->
+    <script src="{% static 'js/jquery.js' %}"></script>
+    <script src="{% static 'js/jquery-ui-1.10.4.min.js' %}"></script>
+    <script src="{% static 'js/jquery-3.3.1.min.js' %}"></script>
+    <script src="{% static 'js/jquery-ui-1.9.2.custom.min.js' %}"></script>
+    <script src="{% static 'js/nepali.datepicker.v2.2.min.js' %}"></script>
+    <script src="{% static 'js/jquery.dataTables.min.js' %}"></script>
+    <script src="{% static 'js/dataTables.buttons.min.js' %}"></script>
+    <script src="{% static 'js/buttons.print.min.js' %}"></script>
+    <script src="{% static 'js/buttons.html5.min.js' %}"></script>
+    <script src="{% static 'js/jszip.min.js' %}"></script>
+
+    {% block extra-css %}{% endblock %}
+
+    <title>{{ title }}</title>
+
+    <!-- Sidebar Custom Styles -->
+    <style>
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .sidebar-menu li {
+            border-bottom: 1px solid #2f3e47;
+        }
+        .sidebar-menu li a {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: #fff;
+            text-decoration: none;
+            transition: background 0.3s ease;
+        }
+        .sidebar-menu li a:hover {
+            background: #1a252f;
+        }
+        .sidebar-menu i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        .sidebar-menu .active a {
+            background: #1a252f;
+            font-weight: bold;
+        }
+        .info-box {
+            padding: 10px;
+            text-align: center;
+            background: #2f3e47;
+            color: #fff;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- container section start -->
+    <section id="container" class="">
+
+        <!-- Header -->
+        <header class="header dark-bg">
+            <div class="row">
+                <div class="col-lg-8">
+                    <a href="#" class="logo">Prekshya-Prasikshya Doodh Dairy</a>
+                </div>
+                <div class="col-lg-4">
+                    <h3>आजको मिती: {{ bs_date }}</h3>
+                </div>
+            </div>
+        </header>
+        <!-- End Header -->
+
+        <!-- Sidebar -->
+        <aside>
+            <div id="sidebar" class="nav-collapse">
+                <ul class="sidebar-menu">
+                    <li class="active">
+                        <a href="{% url 'dairyapp:index' %}">
+                            <i class="fa fa-home"></i> Dashboard (गृह पृष्‍ठ)
+                        </a>
+                    </li>
+
+                    <li class="active" style="pointer-events: none;">
+                        <div class="info-box">
+                            milk 
+                        </div>
+                    </li>
+
+                    <li><a href="{% url 'dairyapp:milk-purchase' %}"><i class="fa fa-shopping-cart"></i> Purchase (खरिद)</a></li>
+                    <li><a href="{% url 'dairyapp:add-milk-products' %}"><i class="fa fa-industry"></i> Production (उत्पादन)</a></li>
+                    <li><a href="{% url 'dairyapp:sell-milk-products' %}"><i class="fa fa-money"></i> Sell (बिक्री)</a></li>
+                    <li><a href="{% url 'dairyapp:operation-cost' %}"><i class="fa fa-calculator"></i> Operation Cost</a></li>
+                    <li><a href="{% url 'dairyapp:report' %}"><i class="fa fa-bar-chart"></i> Report (विवरण)</a></li>
+                    <li><a href="{% url 'dairyapp:settings' %}"><i class="fa fa-cog"></i> Settings</a></li>
+                </ul>
+            </div>
+        </aside>
+        <!-- End Sidebar -->
+
+        <!-- Main Content -->
+        <section id="main-content">
+            <section class="wrapper">
+                {% block main-content %}{% endblock %}
+            </section>
+        </section>
+
+    </section>
+
+    <!-- JS Files -->
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'js/jquery.scrollTo.min.js' %}"></script>
+    <script src="{% static 'js/jquery.nicescroll.js' %}"></script>
+
+    {% block extra-js %}{% endblock %}
+
+</body>
+</html>

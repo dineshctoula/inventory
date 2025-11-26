@@ -1,0 +1,203 @@
+{% extends 'dairyapp/base.html' %}
+
+{% load static %}
+ {% load widget_tweaks %}
+
+{% block extra-css %}
+    <style>
+        .myfont{
+            font-size: 18px;
+
+
+        }
+
+        tr:hover{
+
+            font-weight: bolder;
+        }
+    </style>
+
+{% endblock %}
+{% block main-content %}
+
+
+
+    <div class="row myfont" style="padding-left: 15px;">
+        <div class="col-lg-4">
+            <h2>Buy Milk दुध खरिद</h2>
+
+            <form class="form-horizontal" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                {{ form.non_field_errors }}
+
+                {% for hidden_field in form.hidden_fields %}
+                    {{ hidden_field }}
+                {% endfor %}
+
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger" role="alert">
+                        {% for error in form.non_field_errors %}
+                            {{ error }}
+
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                {% for field in form %}
+
+                    <div class="form-group">
+
+                        {{ field.label_tag }}
+                        {% if form.is_bound %}
+                            {% if field.errors %}
+
+                                {% render_field field class="form-control is-invalid"%}
+
+                                {% for error in field.errors %}
+                                    <div class="invalid-feedback text-danger">
+                                         {{ error }}
+                                    </div>
+                                {% endfor %}
+
+                            {% else %}
+                                   {% render_field field class="form-control is-valid" %}
+                            {% endif %}
+
+                        {% else %}
+                               {% render_field field class="form-control" %}
+                        {% endif %}
+
+                    {% if field.help_text %}
+
+                        <small class="form-text text-primary">{{ field.help_text }}</small>
+                    {% endif %}
+
+                    </div>
+                {% endfor %}
+
+
+
+                <div class="form-group">
+                    <div class="col-sm-12" onclick="if (!confirm('Are you sure?')) { return false }">
+                         <button type="submit" class="btn btn-primary btn-block" >
+                             <strong>Add to Purchase</strong>
+                         </button>
+                    </div>
+                 </div>
+
+            </form>
+
+        </div>
+
+        <div class="col-lg-8">
+            <h2>Showing Latest Milk Purchase  दुध खरिद</h2>
+
+
+            <!-- Milk Purchase list for today -->
+            <div class="table-responsive">
+              <table class="table table-striped table-hover table-responsive">
+                <thead>
+                  <tr class="bg-success">
+                    <th>Date</th>
+                    <th>Seller</th>
+
+                    <th>Milk Type</th>
+                    <th>QTY (ltr)</th>
+                    <th>Rate</th>
+                    <th>Total Amount (NRs)</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+
+                <tbody class="active">
+
+
+                    {% for purchase in milk %}
+                        <tr>
+                            <!-- template tag to convert AD into BS -->
+                            <td>{{ purchase.mPurchase_date |date:"Y-m-d" }}</td>
+
+                            <td>{{purchase.seller  }}</td>
+                            <td>{{purchase.mPurchase_product}}</td>
+                            <td>{{purchase.mPurchase_qty}}</td>
+                            <td>{{purchase.mPurchase_rate}}</td>
+                            <td>{{ purchase.mPurchase_total }}</td>
+                            <td onclick="if (!confirm('Do you want to confirm?')) { return false }">
+                                <a class="btn btn-success" href="{% url 'dairyapp:delete-purchase' id=purchase.mPurchase_id %}">
+                                    <i class="fa fa-times"></i>
+                                </a>
+                            </td>
+                        </tr>
+
+                    {% endfor %}
+                </tbody>
+              </table>
+
+            {% if milk.has_other_pages %}
+                <ul class="pagination">
+                    {% if milk.has_previous %}
+                        <li>
+                            <a href="?page={{ milk.previous_page_number }}">&laquo;</a>
+                        </li>
+                    {% else %}
+                        <li class="disabled">
+                            <span>&laquo;</span>
+                        </li>
+                    {% endif %}
+                    {% for i in milk.paginator.page_range %}
+                        {% if milk.number == i %}
+                            <li class="active">
+                                <span>{{ i }}
+                                <span class="sr-only">(current)</span>
+                                </span>
+                            </li>
+                        {% else %}
+                            <li>
+                                <a href="?page={{ i }}">{{ i }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if milk.has_next %}
+                        <li>
+                            <a href="?page={{ milk.next_page_number }}">&raquo;</a>
+                        </li>
+                    {% else %}
+                        <li class="disabled">
+                            <span>&raquo;</span>
+                        </li>
+                    {% endif %}
+
+                </ul>
+            {% endif %}
+
+
+
+
+
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block extra-js %}
+<script>
+
+        $('#nepalicalendar').nepaliDatePicker({
+            onFocus:false,
+            ndpTriggerButton: true,
+            ndpTriggerButtonText: 'Date',
+            npdMonth:true,
+            npdYearCount:10,
+            ndpTriggerButtonClass: 'btn btn-primary btn-sm',
+            /*disableBefore:'03/05/2075', //MM/DD/YYYY */
+            disableDaysAfter:'1'
+
+        });
+
+
+</script>
+
+{% endblock %}
