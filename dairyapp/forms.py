@@ -42,13 +42,20 @@ class mPurchaseForm(forms.ModelForm):
 
     )
 
+    snf=forms.FloatField(
+        label='SNF',
+        required=False,
+        help_text="Solid Not Fat percentage",
+        widget=forms.NumberInput(attrs={'step': '0.01', 'min': '0', 'max': '10'})
+    )
+
     def __init__(self, *args, **kwargs):
         super(mPurchaseForm, self).__init__(*args, **kwargs)
         self.fields['mPurchase_date'].widget.attrs['id'] = 'nepalicalendar'
 
     class Meta:
         model=mPurchase
-        fields=('seller','mPurchase_date','mPurchase_product','mPurchase_qty','mPurchase_rate',)
+        fields=('seller','mPurchase_date','mPurchase_product','mPurchase_qty','mPurchase_rate','snf',)
 
     ## Negative Value Validations
     def clean(self):
@@ -68,6 +75,10 @@ class mPurchaseForm(forms.ModelForm):
 
         if(mPurchase_rate<0):
             self._errors['mPurchase_rate'] = self.error_class(["Negative value not allowed"])
+
+        snf = self.cleaned_data.get('snf')
+        if snf is not None and snf < 0:
+            self._errors['snf'] = self.error_class(["SNF value cannot be negative"])
 
         return self.cleaned_data
 

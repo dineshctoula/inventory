@@ -57,6 +57,7 @@ class mPurchase(models.Model):
     mPurchase_product=models.CharField(max_length=15,choices=MILK_CHOICES)
     mPurchase_qty=models.FloatField()
     mPurchase_rate=models.FloatField()
+    snf=models.FloatField(null=True, blank=True, help_text="Solid Not Fat percentage")
     mPurchase_total=models.FloatField(default=0)
 
     def __str__(self):

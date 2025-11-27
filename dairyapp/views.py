@@ -23,7 +23,7 @@ def index(request):
 @login_required
 def milkPurchase(request):
     title='Buy Milk'
-    milk_list = mPurchase.objects.all().order_by('-mPurchase_date')
+    milk_list = mPurchase.objects.all().order_by('-mPurchase_id')
 
     if request.method=='POST':
         form=mPurchaseForm(request.POST)
@@ -328,7 +328,7 @@ def report(request):
 @login_required
 def purchaseReport(request):
     title='Purchase Report'
-    milk=mPurchase.objects.all().order_by('-mPurchase_date')[:10]
+    milk=mPurchase.objects.all().order_by('-mPurchase_id')[:10]
 
     if request.method=='POST':
         form=dateForm(request.POST)
@@ -340,7 +340,7 @@ def purchaseReport(request):
             dateTo=f.get('todate')
             ## filter by start and stop date
             milk=mPurchase.objects.filter(mPurchase_date__gte=dateFrom,
-                                          mPurchase_date__lte=dateTo).order_by('-mPurchase_date')
+                                          mPurchase_date__lte=dateTo).order_by('-mPurchase_id')
 
             if not milk:
                 messages.info(request, 'No Records Found')
