@@ -4,90 +4,256 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     
     <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
-    <link href="{% static 'css/bootstrap-theme.css' %}" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <link href="{% static 'css/style.css' %}" rel="stylesheet">
-    
+
     <title>Login - Dairy Management System</title>
     
     <style>
+        html {
+            margin: 0 !important;
+            padding: 0 !important;
+            height: 100% !important;
+            width: 100% !important;
+            overflow: hidden !important;
+        }
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Arial', sans-serif;
+            margin: 0 !important;
+            padding: 0 !important;
+            height: 100vh !important;
+            width: 100% !important;
+            overflow: hidden !important;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            font-family: 'Arial', sans-serif !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
         .login-container {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            padding: 40px;
-            width: 100%;
-            max-width: 400px;
+            background: white !important;
+            border-radius: 10px !important;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3) !important;
+            padding: 40px !important;
+            width: 100% !important;
+            max-width: 400px !important;
+            margin: 0 auto !important;
         }
         .login-header {
-            text-align: center;
-            margin-bottom: 30px;
+            text-align: center !important;
+            margin-bottom: 30px !important;
         }
         .login-header h2 {
-            color: #333;
-            margin-bottom: 10px;
+            color: #333 !important;
+            margin-bottom: 10px !important;
+            font-size: 24px !important;
+            font-weight: bold !important;
         }
         .login-header p {
-            color: #666;
-            font-size: 14px;
+            color: #666 !important;
+            font-size: 14px !important;
+            margin: 0 !important;
         }
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 20px !important;
+            position: relative !important;
         }
         .form-group label {
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 8px;
-            display: block;
+            font-weight: 600 !important;
+            color: #333 !important;
+            margin-bottom: 8px !important;
+            display: block !important;
+        }
+        .password-wrapper {
+            position: relative !important;
         }
         .form-control {
-            height: 45px;
-            border-radius: 5px;
-            border: 1px solid #ddd;
-            padding: 10px 15px;
-            font-size: 14px;
+            height: 45px !important;
+            border-radius: 5px !important;
+            border: 1px solid #ddd !important;
+            padding: 10px 45px 10px 15px !important;
+            font-size: 14px !important;
+            width: 100% !important;
         }
         .form-control:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+            border-color: #667eea !important;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25) !important;
+            outline: none !important;
+        }
+        .password-toggle {
+            position: absolute !important;
+            right: 15px !important;
+            top: 50% !important;
+            transform: translateY(-50%) !important;
+            cursor: pointer !important;
+            color: #667eea !important;
+            font-size: 18px !important;
+            z-index: 10 !important;
+            padding: 5px !important;
+            background: transparent !important;
+            border: none !important;
+        }
+        .password-toggle:hover {
+            color: #764ba2 !important;
         }
         .btn-login {
-            width: 100%;
-            height: 45px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            color: white;
-            font-size: 16px;
-            font-weight: 600;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: transform 0.2s;
+            width: 100% !important;
+            height: 45px !important;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            border: none !important;
+            color: white !important;
+            font-size: 16px !important;
+            font-weight: 600 !important;
+            border-radius: 5px !important;
+            cursor: pointer !important;
+            transition: transform 0.2s !important;
         }
         .btn-login:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            transform: translateY(-2px) !important;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4) !important;
         }
         .alert {
-            border-radius: 5px;
-            margin-bottom: 20px;
+            border-radius: 5px !important;
+            margin-bottom: 20px !important;
         }
         .icon-wrapper {
-            text-align: center;
-            margin-bottom: 20px;
+            text-align: center !important;
+            margin-bottom: 20px !important;
         }
         .icon-wrapper i {
-            font-size: 60px;
-            color: #667eea;
+            font-size: 60px !important;
+            color: #667eea !important;
+        }
+        .btn-login:disabled {
+            opacity: 0.8 !important;
+            cursor: not-allowed !important;
+        }
+        .btn-login .spinner {
+            display: none;
+            margin-right: 8px;
+            font-size: 16px;
+        }
+        .btn-login.loading .spinner {
+            display: inline-block;
+        }
+        .btn-login.loading .fa-sign-in {
+            display: none;
+        }
+        .btn-login.loading {
+            pointer-events: none;
+        }
+        .login-toast-container {
+            position: fixed !important;
+            top: 20px !important;
+            right: 20px !important;
+            z-index: 10001 !important;
+            width: 350px !important;
+            max-width: calc(100% - 40px) !important;
+        }
+        .login-toast-message {
+            background: white !important;
+            border-radius: 8px !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
+            margin-bottom: 15px !important;
+            padding: 15px 20px !important;
+            display: flex !important;
+            align-items: center !important;
+            animation: slideInRight 0.3s ease-out !important;
+            position: relative !important;
+            border-left: 4px solid !important;
+            min-height: 60px !important;
+        }
+        .login-toast-message.success {
+            border-left-color: #28a745 !important;
+            background: #d4edda !important;
+        }
+        .login-toast-message.error {
+            border-left-color: #dc3545 !important;
+            background: #f8d7da !important;
+        }
+        .login-toast-message.warning {
+            border-left-color: #ffc107 !important;
+            background: #fff3cd !important;
+        }
+        .login-toast-message.info {
+            border-left-color: #17a2b8 !important;
+            background: #d1ecf1 !important;
+        }
+        .login-toast-icon {
+            font-size: 24px !important;
+            margin-right: 15px !important;
+            flex-shrink: 0 !important;
+        }
+        .login-toast-message.success .login-toast-icon {
+            color: #28a745 !important;
+        }
+        .login-toast-message.error .login-toast-icon {
+            color: #dc3545 !important;
+        }
+        .login-toast-message.warning .login-toast-icon {
+            color: #ffc107 !important;
+        }
+        .login-toast-message.info .login-toast-icon {
+            color: #17a2b8 !important;
+        }
+        .login-toast-content {
+            flex: 1 !important;
+            color: #333 !important;
+            font-size: 14px !important;
+            line-height: 1.5 !important;
+        }
+        .login-toast-close {
+            background: none !important;
+            border: none !important;
+            color: #666 !important;
+            font-size: 20px !important;
+            cursor: pointer !important;
+            padding: 0 !important;
+            margin-left: 15px !important;
+            line-height: 1 !important;
+            opacity: 0.7 !important;
+            transition: opacity 0.2s !important;
+            flex-shrink: 0 !important;
+        }
+        .login-toast-close:hover {
+            opacity: 1 !important;
+        }
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+        .login-toast-message.hide {
+            animation: slideOutRight 0.3s ease-out forwards !important;
+
         }
     </style>
 </head>
@@ -100,18 +266,6 @@
             <h2>Dairy Management System</h2>
             <p>Owner Login</p>
         </div>
-        
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-            {% endfor %}
-        {% endif %}
-        
         <form method="POST" action="{% url 'accounts:login' %}">
             {% csrf_token %}
             <div class="form-group">
@@ -131,20 +285,139 @@
                 <label for="password">
                     <i class="fa fa-lock"></i> Password
                 </label>
-                <input type="password" 
-                       class="form-control" 
-                       id="password" 
-                       name="password" 
-                       placeholder="Enter your password"
-                       required>
+                <div class="password-wrapper">
+                    <input type="password" 
+                           class="form-control" 
+                           id="password" 
+                           name="password" 
+                           placeholder="Enter your password"
+                           required>
+                    <button type="button" class="password-toggle" onclick="togglePassword()">
+                        <i class="fa fa-eye" id="toggleIcon"></i>
+                    </button>
+                </div>
             </div>
             
-            <button type="submit" class="btn btn-login">
+            <button type="submit" class="btn btn-login" id="loginButton">
+                <i class="fa fa-spinner fa-spin spinner"></i>
+
                 <i class="fa fa-sign-in"></i> Login
             </button>
         </form>
     </div>
+    <div class="login-toast-container" id="loginToastContainer">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="login-toast-message {% if message.tags == 'error' %}error{% else %}{{ message.tags }}{% endif %}" data-message-id="{{ forloop.counter }}">
+                    {% if message.tags == 'success' %}
+                        <i class="fa fa-check-circle login-toast-icon"></i>
+                    {% elif message.tags == 'error' or message.tags == 'danger' %}
+                        <i class="fa fa-exclamation-circle login-toast-icon"></i>
+                    {% elif message.tags == 'warning' %}
+                        <i class="fa fa-exclamation-triangle login-toast-icon"></i>
+                    {% elif message.tags == 'info' %}
+                        <i class="fa fa-info-circle login-toast-icon"></i>
+                    {% else %}
+                        <i class="fa fa-exclamation-circle login-toast-icon"></i>
+                    {% endif %}
+                    <div class="login-toast-content">
+                        {{ message|safe }}
+                    </div>
+                    <button class="login-toast-close" onclick="closeLoginToast(this)">&times;</button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
     
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.documentElement.style.margin = '0';
+            document.documentElement.style.padding = '0';
+            document.documentElement.style.height = '100%';
+            document.documentElement.style.overflow = 'hidden';
+            
+            document.body.style.margin = '0';
+            document.body.style.padding = '0';
+            document.body.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+            document.body.style.display = 'flex';
+            document.body.style.alignItems = 'center';
+            document.body.style.justifyContent = 'center';
+            document.body.style.height = '100vh';
+            document.body.style.width = '100%';
+            document.body.style.position = 'fixed';
+            document.body.style.top = '0';
+            document.body.style.left = '0';
+            document.body.style.right = '0';
+            document.body.style.bottom = '0';
+            document.body.style.overflow = 'hidden';
+            
+            var loginToasts = document.querySelectorAll('.login-toast-message');
+            var loginButton = document.querySelector('.btn-login');
+            
+            if (loginButton) {
+                loginButton.disabled = false;
+                loginButton.classList.remove('loading');
+            }
+            
+            if (loginToasts.length > 0) {
+                loginToasts.forEach(function(toast) {
+                    toast.style.display = 'flex';
+                    toast.style.visibility = 'visible';
+                    toast.style.opacity = '1';
+                    
+                    var closeBtn = toast.querySelector('.login-toast-close');
+                    setTimeout(function() {
+                        if (closeBtn) {
+                            closeLoginToast(closeBtn);
+                        } else {
+                            toast.classList.add('hide');
+                            setTimeout(function() {
+                                toast.remove();
+                            }, 300);
+                        }
+                    }, 5000);
+                });
+            }
+        });
+        
+        function closeLoginToast(button) {
+            var toast = button.closest('.login-toast-message');
+            if (toast) {
+                toast.classList.add('hide');
+                setTimeout(function() {
+                    toast.remove();
+                }, 300);
+            }
+        }
+        
+        function togglePassword() {
+            var passwordField = document.getElementById('password');
+            var toggleIcon = document.getElementById('toggleIcon');
+            
+            if (passwordField.type === 'password') {
+                passwordField.type = 'text';
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordField.type = 'password';
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            }
+        }
+        
+        document.querySelector('form').addEventListener('submit', function(e) {
+            var email = document.getElementById('email').value;
+            var password = document.getElementById('password').value;
+            
+            if (email && password) {
+                var loginButton = document.querySelector('.btn-login');
+                
+                loginButton.disabled = true;
+                loginButton.classList.add('loading');
+            }
+        });
+    </script>
+
     <script src="{% static 'js/jquery.js' %}"></script>
     <script src="{% static 'js/bootstrap.min.js' %}"></script>
 </body>

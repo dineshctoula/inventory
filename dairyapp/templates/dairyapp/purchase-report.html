@@ -107,6 +107,7 @@
                     <th>Milk Type</th>
                     <th>QTY (ltr)</th>
                     <th>Rate</th>
+                    <th>SNF</th>
                     <th>Total Amount (NRs)</th>
                   </tr>
                 </thead>
@@ -122,6 +123,7 @@
                             <td>{{purchase.mPurchase_product}}</td>
                             <td>{{purchase.mPurchase_qty}}</td>
                             <td>{{purchase.mPurchase_rate}}</td>
+                            <td>{% if purchase.snf %}{{ purchase.snf|floatformat:2 }}{% else %}-{% endif %}</td>
                             <td>{{ purchase.mPurchase_total }}</td>
                         </tr>
 

@@ -7,19 +7,24 @@ User = get_user_model()
 
 class EmailBackend(ModelBackend):
     def authenticate(self, request, username=None, password=None, **kwargs):
-        email = kwargs.get('email', username)
+        email = kwargs.get('email')
         if email is None:
-            email = kwargs.get('email')
+            email = username
         
+        if email is None or password is None:
+            return None
+        
+        user = None
         try:
-            user = User.objects.get(Q(email=email) | Q(username=email))
+            user = User.objects.get(Q(email__iexact=email) | Q(username__iexact=email))
+(Q(email=email) | Q(username=email))
         except User.DoesNotExist:
             User().set_password(password)
             return None
         except User.MultipleObjectsReturned:
-            user = User.objects.filter(Q(email=email) | Q(username=email)).first()
+            user = User.objects.filter(Q(email__iexact=email) | Q(username__iexact=email)).first()
 
-        if user.check_password(password) and self.user_can_authenticate(user):
+        if user and user.check_password(password) and self.user_can_authenticate(user):
             return user
         return None
 

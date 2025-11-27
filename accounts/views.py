@@ -9,11 +9,12 @@ def login_view(request):
         return redirect('dairyapp:index')
     
     if request.method == 'POST':
-        email = request.POST.get('email')
-        password = request.POST.get('password')
+        email = request.POST.get('email', '').strip()
+        password = request.POST.get('password', '').strip()
         
         if email and password:
-            user = authenticate(request, email=email, password=password)
+            user = authenticate(request, username=email, password=password, email=email)
+
             if user is not None:
                 login(request, user)
                 messages.success(request, f'Welcome back, {user.get_full_name() or user.email}!')
@@ -33,4 +34,10 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     messages.success(request, 'You have been successfully logged out.')
-    return redirect('accounts:login')
+    response = redirect('accounts:login')
+    response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    response['Pragma'] = 'no-cache'
+    response['Expires'] = '0'
+    return response
+
+
