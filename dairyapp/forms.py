@@ -1,5 +1,5 @@
 from django import forms
-from .models import mProduct,mProductUnit,mPurchase, mStock, mProductSell, operationCost,test
+from .models import mProduct,mProductUnit,mPurchase, mStock, mProductSell, operationCost,test,Due
 from dairyapp.choices import MILK_CHOICES
 import datetime
 from bootstrap_modal_forms.mixins import PopRequestMixin, CreateUpdateAjaxMixin
@@ -336,6 +336,79 @@ class testForm(forms.ModelForm):
     class Meta:
         model=test
         fields=('name','date',)
+
+
+class DueForm(forms.ModelForm):
+    due_type = forms.ChoiceField(
+        choices=Due.DUE_TYPE_CHOICES,
+        label='Due Type',
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        required=True
+    )
+    
+    person_name = forms.CharField(
+        label='Person Name',
+        max_length=100,
+        help_text="Enter customer or supplier name",
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        required=True
+    )
+    
+    date = forms.DateField(
+        label='Date',
+        required=True,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'nepalicalendar'})
+    )
+    
+    particular = forms.CharField(
+        label='Particular / Description',
+        max_length=200,
+        help_text="Enter description or reason for due",
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        required=True
+    )
+    
+    total_amount = forms.FloatField(
+        label='Total Amount (NRs)',
+        help_text="Enter total amount",
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+        required=True
+    )
+    
+    paid_amount = forms.FloatField(
+        label='Paid Amount (NRs)',
+        help_text="Enter paid amount (if any)",
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+        required=False,
+        initial=0
+    )
+    
+    remarks = forms.CharField(
+        label='Remarks (Optional)',
+        max_length=500,
+        required=False,
+        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3})
+    )
+    
+    def clean(self):
+        cleaned_data = super(DueForm, self).clean()
+        total_amount = cleaned_data.get('total_amount')
+        paid_amount = cleaned_data.get('paid_amount') or 0
+        
+        if total_amount is not None and total_amount < 0:
+            self.add_error('total_amount', 'Amount cannot be negative')
+        
+        if paid_amount is not None and paid_amount < 0:
+            self.add_error('paid_amount', 'Paid amount cannot be negative')
+        
+        if total_amount is not None and paid_amount is not None and paid_amount > total_amount:
+            self.add_error('paid_amount', 'Paid amount cannot exceed total amount')
+        
+        return cleaned_data
+    
+    class Meta:
+        model = Due
+        fields = ('due_type', 'person_name', 'date', 'particular', 'total_amount', 'paid_amount', 'remarks')
 
 
 

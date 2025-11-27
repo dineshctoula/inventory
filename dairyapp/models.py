@@ -111,3 +111,34 @@ class test(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Due(models.Model):
+    CUSTOMER_DUE = 'customer'
+    SUPPLIER_DUE = 'supplier'
+    
+    DUE_TYPE_CHOICES = (
+        (CUSTOMER_DUE, 'Customer Due'),
+        (SUPPLIER_DUE, 'Supplier Due'),
+    )
+    
+    due_id = models.AutoField(primary_key=True)
+    due_type = models.CharField(max_length=10, choices=DUE_TYPE_CHOICES, default=CUSTOMER_DUE)
+    person_name = models.CharField(max_length=100)
+    date = models.DateField(blank=True, null=True, default=datetime.date.today)
+    particular = models.CharField(max_length=200, help_text="Description or reason for due")
+    total_amount = models.FloatField(default=0)
+    paid_amount = models.FloatField(default=0)
+    balance_amount = models.FloatField(default=0)
+    remarks = models.TextField(max_length=500, blank=True, null=True)
+    
+    def save(self, *args, **kwargs):
+        self.balance_amount = self.total_amount - self.paid_amount
+        super().save(*args, **kwargs)
+    
+    def __str__(self):
+        return f"{self.person_name} - {self.balance_amount}"
+
+    @property
+    def is_paid(self):
+        return self.balance_amount <= 0

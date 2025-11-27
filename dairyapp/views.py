@@ -1,12 +1,12 @@
-from .forms import mPurchaseForm,mStockForm,mProductSellForm, operationCostForm,testForm,dateForm, addProductForm,addProductUnitForm
-from .models import mPurchase,mProduct,mStock, mProductSell, mProduct, mProductUnit,test
+from .forms import mPurchaseForm,mStockForm,mProductSellForm, operationCostForm,testForm,dateForm, addProductForm,addProductUnitForm,DueForm
+from .models import mPurchase,mProduct,mStock, mProductSell, mProduct, mProductUnit,test,Due
 from .models import operationCost as operationCostModel
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.views import generic
 from django.urls import reverse_lazy
-from django.core.paginator import Paginator
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from bootstrap_modal_forms.mixins import PassRequestMixin
@@ -246,6 +246,76 @@ def operationCost(request):
 def deleteOperationCost(request,id):
     operationCostModel.objects.get(operationCost_id=id).delete()
     return redirect('/operationcost')
+
+@login_required
+def due(request):
+    title='Due (बाँकी)'
+    dues_list = Due.objects.all().order_by('-date')
+    
+    if request.method == 'POST':
+        form = DueForm(request.POST)
+        if form.is_valid():
+            due_obj = form.save(commit=False)
+            due_obj.balance_amount = due_obj.total_amount - due_obj.paid_amount
+            due_obj.save()
+            messages.success(request, 'Due record added successfully.')
+            return redirect('/due/')
+    else:
+        form = DueForm()
+    
+    page = request.GET.get('page', 1)
+    paginator = Paginator(dues_list, 10)
+    
+    try:
+        dues = paginator.page(page)
+    except PageNotAnInteger:
+        dues = paginator.page(1)
+    except EmptyPage:
+        dues = paginator.page(paginator.num_pages)
+    
+    customer_dues = Due.objects.filter(due_type='customer')
+    supplier_dues = Due.objects.filter(due_type='supplier')
+    total_customer_due = sum([d.balance_amount for d in customer_dues if d.balance_amount > 0])
+    total_supplier_due = sum([d.balance_amount for d in supplier_dues if d.balance_amount > 0])
+    net_receivable = total_customer_due - total_supplier_due
+    
+    context = {
+        'title': title,
+        'form': form,
+        'dues': dues,
+        'total_customer_due': total_customer_due,
+        'total_supplier_due': total_supplier_due,
+        'net_receivable': net_receivable,
+    }
+    return render(request,'dairyapp/due.html',context)
+
+@login_required
+def dueDelete(request, id):
+    Due.objects.get(due_id=id).delete()
+    messages.success(request, 'Due record deleted successfully.')
+    return redirect('/due/')
+
+@login_required
+def dueUpdate(request, id):
+    due_obj = get_object_or_404(Due, due_id=id)
+    
+    if request.method == 'POST':
+        form = DueForm(request.POST, instance=due_obj)
+        if form.is_valid():
+            due_obj = form.save(commit=False)
+            due_obj.balance_amount = due_obj.total_amount - due_obj.paid_amount
+            due_obj.save()
+            messages.success(request, 'Due record updated successfully.')
+            return redirect('/due/')
+    else:
+        form = DueForm(instance=due_obj)
+    
+    context = {
+        'title': 'Update Due',
+        'form': form,
+        'due': due_obj,
+    }
+    return render(request, 'dairyapp/due-update.html', context)
 
 @login_required
 def report(request):

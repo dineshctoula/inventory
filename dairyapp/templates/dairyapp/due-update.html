@@ -1,0 +1,442 @@
+{% extends 'dairyapp/base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block extra-css %}
+<style>
+    .update-due-container {
+        background: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        padding: 30px;
+        margin-bottom: 30px;
+    }
+    .due-header {
+        border-bottom: 2px solid #e9ecef;
+        padding-bottom: 15px;
+        margin-bottom: 25px;
+    }
+    .due-header h2 {
+        margin: 0;
+        color: #495057;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .due-header h2 i {
+        color: #007bff;
+    }
+    .due-info-card {
+        background: #f8f9fa;
+        border-left: 4px solid #007bff;
+        padding: 15px;
+        border-radius: 4px;
+        margin-bottom: 25px;
+    }
+    .due-info-card h4 {
+        margin-top: 0;
+        color: #495057;
+        font-size: 16px;
+    }
+    .due-info-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        padding: 5px 0;
+        border-bottom: 1px solid #dee2e6;
+    }
+    .due-info-row:last-child {
+        border-bottom: none;
+    }
+    .due-info-label {
+        font-weight: 600;
+        color: #6c757d;
+    }
+    .due-info-value {
+        color: #212529;
+        font-weight: 500;
+    }
+    .form-section {
+        margin-bottom: 25px;
+    }
+    .form-section-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #e9ecef;
+    }
+    .form-group {
+        margin-bottom: 20px;
+    }
+    .date-icon-trigger {
+        background-color: #007bff !important;
+        color: white !important;
+        cursor: pointer;
+        border-color: #007bff !important;
+        transition: all 0.3s ease;
+    }
+    .date-icon-trigger:hover {
+        background-color: #0056b3 !important;
+        border-color: #0056b3 !important;
+    }
+    .date-icon-trigger i {
+        font-size: 16px;
+    }
+    .input-group .form-control {
+        width: 100% !important;
+    }
+    .form-group label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 8px;
+        display: block;
+    }
+    .balance-preview {
+        background: #fff3cd;
+        border: 1px solid #ffc107;
+        border-radius: 4px;
+        padding: 15px;
+        margin-top: 10px;
+        display: none;
+    }
+    .balance-preview.active {
+        display: block;
+    }
+    .balance-preview-label {
+        font-weight: 600;
+        color: #856404;
+        margin-bottom: 5px;
+    }
+    .balance-preview-value {
+        font-size: 20px;
+        font-weight: bold;
+        color: #856404;
+    }
+    .balance-preview-value.positive {
+        color: #155724;
+    }
+    .balance-preview-value.negative {
+        color: #721c24;
+    }
+    .btn-group-custom {
+        display: flex;
+        gap: 10px;
+        margin-top: 30px;
+        padding-top: 25px;
+        border-top: 2px solid #e9ecef;
+    }
+    .btn-group-custom .btn {
+        flex: 1;
+        padding: 12px;
+        font-size: 16px;
+        font-weight: 600;
+    }
+</style>
+{% endblock %}
+
+{% block main-content %}
+<div class="row">
+    <div class="col-lg-10 col-lg-offset-1">
+        <div class="update-due-container">
+            <div class="due-header">
+                <h2>
+                    <i class="fa fa-edit"></i>
+                    Update Due Record
+                </h2>
+            </div>
+
+            {% if due %}
+            <div class="due-info-card">
+                <h4><i class="fa fa-info-circle"></i> Current Record Information</h4>
+                <div class="due-info-row">
+                    <span class="due-info-label">Person Name:</span>
+                    <span class="due-info-value">{{ due.person_name }}</span>
+                </div>
+                <div class="due-info-row">
+                    <span class="due-info-label">Due Type:</span>
+                    <span class="due-info-value">
+                        {% if due.due_type == 'customer' %}
+                            <span class="label label-success" style="padding: 5px 10px; border-radius: 3px;">Customer Due</span>
+                        {% else %}
+                            <span class="label label-danger" style="padding: 5px 10px; border-radius: 3px;">Supplier Due</span>
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="due-info-row">
+                    <span class="due-info-label">Current Balance:</span>
+                    <span class="due-info-value">
+                        {% if due.balance_amount > 0 %}
+                            <strong class="text-danger">NRs. {{ due.balance_amount|floatformat:2 }}</strong>
+                        {% else %}
+                            <span class="label label-default" style="padding: 5px 10px; border-radius: 3px;">Paid</span>
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+            {% endif %}
+
+            <form method="POST" enctype="multipart/form-data" id="dueUpdateForm">
+                {% csrf_token %}
+
+                {{ form.non_field_errors }}
+
+                {% for hidden_field in form.hidden_fields %}
+                    {{ hidden_field }}
+                {% endfor %}
+
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger" role="alert">
+                        <i class="fa fa-exclamation-triangle"></i>
+                        {% for error in form.non_field_errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <div class="form-section">
+                    <div class="form-section-title">Basic Information</div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>{{ form.due_type.label }}</label>
+                                {% if form.is_bound %}
+                                    {% if form.due_type.errors %}
+                                        {% render_field form.due_type class="form-control is-invalid"%}
+                                        {% for error in form.due_type.errors %}
+                                            <div class="invalid-feedback text-danger">
+                                                {{ error }}
+                                            </div>
+                                        {% endfor %}
+                                    {% else %}
+                                        {% render_field form.due_type class="form-control is-valid" %}
+                                    {% endif %}
+                                {% else %}
+                                    {% render_field form.due_type class="form-control" %}
+                                {% endif %}
+                                {% if form.due_type.help_text %}
+                                    <small class="form-text text-muted">{{ form.due_type.help_text }}</small>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>{{ form.date.label }}</label>
+                                <div class="input-group">
+                                    {% if form.is_bound %}
+                                        {% if form.date.errors %}
+                                            {% render_field form.date class="form-control is-invalid" id="nepalicalendar"%}
+                                            {% for error in form.date.errors %}
+                                                <div class="invalid-feedback text-danger">
+                                                    {{ error }}
+                                                </div>
+                                            {% endfor %}
+                                        {% else %}
+                                            {% render_field form.date class="form-control is-valid" id="nepalicalendar"%}
+                                        {% endif %}
+                                    {% else %}
+                                        {% render_field form.date class="form-control" id="nepalicalendar"%}
+                                    {% endif %}
+                                    <span class="input-group-addon date-icon-trigger" id="dateIconTrigger">
+                                        <i class="fa fa-calendar"></i>
+                                    </span>
+                                </div>
+                                {% if form.date.help_text %}
+                                    <small class="form-text text-muted">{{ form.date.help_text }}</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>{{ form.person_name.label }}</label>
+                        {% if form.is_bound %}
+                            {% if form.person_name.errors %}
+                                {% render_field form.person_name class="form-control is-invalid"%}
+                                {% for error in form.person_name.errors %}
+                                    <div class="invalid-feedback text-danger">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                {% render_field form.person_name class="form-control is-valid" %}
+                            {% endif %}
+                        {% else %}
+                            {% render_field form.person_name class="form-control" %}
+                        {% endif %}
+                        {% if form.person_name.help_text %}
+                            <small class="form-text text-muted">{{ form.person_name.help_text }}</small>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label>{{ form.particular.label }}</label>
+                        {% if form.is_bound %}
+                            {% if form.particular.errors %}
+                                {% render_field form.particular class="form-control is-invalid"%}
+                                {% for error in form.particular.errors %}
+                                    <div class="invalid-feedback text-danger">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                {% render_field form.particular class="form-control is-valid" %}
+                            {% endif %}
+                        {% else %}
+                            {% render_field form.particular class="form-control" %}
+                        {% endif %}
+                        {% if form.particular.help_text %}
+                            <small class="form-text text-muted">{{ form.particular.help_text }}</small>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="form-section-title">Amount Details</div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>{{ form.total_amount.label }} <span class="text-danger">*</span></label>
+                                {% if form.is_bound %}
+                                    {% if form.total_amount.errors %}
+                                        {% render_field form.total_amount class="form-control is-invalid" id="id_total_amount"%}
+                                        {% for error in form.total_amount.errors %}
+                                            <div class="invalid-feedback text-danger">
+                                                {{ error }}
+                                            </div>
+                                        {% endfor %}
+                                    {% else %}
+                                        {% render_field form.total_amount class="form-control is-valid" id="id_total_amount"%}
+                                    {% endif %}
+                                {% else %}
+                                    {% render_field form.total_amount class="form-control" id="id_total_amount"%}
+                                {% endif %}
+                                {% if form.total_amount.help_text %}
+                                    <small class="form-text text-muted">{{ form.total_amount.help_text }}</small>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>{{ form.paid_amount.label }}</label>
+                                {% if form.is_bound %}
+                                    {% if form.paid_amount.errors %}
+                                        {% render_field form.paid_amount class="form-control is-invalid" id="id_paid_amount"%}
+                                        {% for error in form.paid_amount.errors %}
+                                            <div class="invalid-feedback text-danger">
+                                                {{ error }}
+                                            </div>
+                                        {% endfor %}
+                                    {% else %}
+                                        {% render_field form.paid_amount class="form-control is-valid" id="id_paid_amount"%}
+                                    {% endif %}
+                                {% else %}
+                                    {% render_field form.paid_amount class="form-control" id="id_paid_amount"%}
+                                {% endif %}
+                                {% if form.paid_amount.help_text %}
+                                    <small class="form-text text-muted">{{ form.paid_amount.help_text }}</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="balance-preview" id="balancePreview">
+                        <div class="balance-preview-label">Calculated Balance:</div>
+                        <div class="balance-preview-value" id="balanceValue">NRs. 0.00</div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="form-section-title">Additional Information</div>
+                    
+                    <div class="form-group">
+                        <label>{{ form.remarks.label }}</label>
+                        {% if form.is_bound %}
+                            {% if form.remarks.errors %}
+                                {% render_field form.remarks class="form-control is-invalid"%}
+                                {% for error in form.remarks.errors %}
+                                    <div class="invalid-feedback text-danger">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                {% render_field form.remarks class="form-control is-valid" %}
+                            {% endif %}
+                        {% else %}
+                            {% render_field form.remarks class="form-control" %}
+                        {% endif %}
+                        {% if form.remarks.help_text %}
+                            <small class="form-text text-muted">{{ form.remarks.help_text }}</small>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="btn-group-custom">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa fa-save"></i> Update Due Record
+                    </button>
+                    <a href="{% url 'dairyapp:due' %}" class="btn btn-default">
+                        <i class="fa fa-times"></i> Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock main-content %}
+
+{% block extra-js %}
+<script>
+    $('#nepalicalendar').nepaliDatePicker({
+        onFocus: true,
+        ndpTriggerButton: false,
+        npdMonth: true,
+        npdYearCount: 10,
+        disableDaysAfter: '1'
+    });
+    
+    $('#dateIconTrigger').on('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        $('#nepalicalendar').focus();
+    });
+
+    function calculateBalance() {
+        var totalAmount = parseFloat($('#id_total_amount').val()) || 0;
+        var paidAmount = parseFloat($('#id_paid_amount').val()) || 0;
+        var balance = totalAmount - paidAmount;
+        
+        var balancePreview = $('#balancePreview');
+        var balanceValue = $('#balanceValue');
+        
+        if (totalAmount > 0) {
+            balancePreview.addClass('active');
+            balanceValue.text('NRs. ' + balance.toFixed(2));
+            
+            if (balance > 0) {
+                balanceValue.removeClass('negative').addClass('positive');
+            } else if (balance < 0) {
+                balanceValue.removeClass('positive').addClass('negative');
+            } else {
+                balanceValue.removeClass('positive negative');
+            }
+        } else {
+            balancePreview.removeClass('active');
+        }
+    }
+
+    $('#id_total_amount, #id_paid_amount').on('input change', function() {
+        calculateBalance();
+    });
+
+    $(document).ready(function() {
+        calculateBalance();
+    });
+</script>
+{% endblock %}

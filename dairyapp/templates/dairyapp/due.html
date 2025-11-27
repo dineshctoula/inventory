@@ -1,0 +1,265 @@
+{% extends 'dairyapp/base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block extra-css %}
+<style>
+    .myclass{
+        font-size:large;
+    }
+    .myclass:hover{
+        font-weight:bold;
+    }
+    .due-summary {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+    }
+    .due-badge {
+        display: inline-block;
+        padding: 5px 10px;
+        border-radius: 3px;
+        font-size: 12px;
+        font-weight: bold;
+    }
+    .badge-customer {
+        background: #28a745;
+        color: white;
+    }
+    .badge-supplier {
+        background: #dc3545;
+        color: white;
+    }
+    .badge-paid {
+        background: #6c757d;
+        color: white;
+    }
+    .date-icon-trigger {
+        background-color: #007bff !important;
+        color: white !important;
+        cursor: pointer;
+        border-color: #007bff !important;
+        transition: all 0.3s ease;
+    }
+    .date-icon-trigger:hover {
+        background-color: #0056b3 !important;
+        border-color: #0056b3 !important;
+    }
+    .date-icon-trigger i {
+        font-size: 16px;
+    }
+    .input-group .form-control {
+        width: 100% !important;
+    }
+</style>
+{% endblock %}
+
+{% block main-content %}
+<div class="row">
+    <div class="col-lg-12">
+        <h2><strong>Due Management (बाँकी व्यवस्थापन)</strong></h2>
+        <hr>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-3">
+        <div class="due-summary">
+            <h4>Total Customer Due</h4>
+            <h3 class="text-success">NRs. {{ total_customer_due|floatformat:2 }}</h3>
+        </div>
+    </div>
+    <div class="col-lg-3">
+        <div class="due-summary">
+            <h4>Total Supplier Due</h4>
+            <h3 class="text-danger">NRs. {{ total_supplier_due|floatformat:2 }}</h3>
+        </div>
+    </div>
+    <div class="col-lg-3">
+        <div class="due-summary">
+            <h4>Net Receivable</h4>
+            <h3 class="text-info">NRs. {{ net_receivable|floatformat:2 }}</h3>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-5 col-lg-offset-1">
+        <h3><strong>Add Due Record</strong></h3>
+
+        <form class="form-horizontal" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            {{ form.non_field_errors }}
+
+            {% for hidden_field in form.hidden_fields %}
+                {{ hidden_field }}
+            {% endfor %}
+
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger" role="alert">
+                    {% for error in form.non_field_errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {% for field in form %}
+                <div class="form-group">
+                    {{ field.label_tag }}
+                    {% if field.name == 'date' %}
+                        <div class="input-group">
+                            {% if form.is_bound %}
+                                {% if field.errors %}
+                                    {% render_field field class="form-control is-invalid" id="nepalicalendar"%}
+                                    {% for error in field.errors %}
+                                        <div class="invalid-feedback text-danger">
+                                             {{ error }}
+                                        </div>
+                                    {% endfor %}
+                                {% else %}
+                                    {% render_field field class="form-control is-valid" id="nepalicalendar"%}
+                                {% endif %}
+                            {% else %}
+                                {% render_field field class="form-control" id="nepalicalendar"%}
+                            {% endif %}
+                            <span class="input-group-addon date-icon-trigger" id="dateIconTrigger">
+                                <i class="fa fa-calendar"></i>
+                            </span>
+                        </div>
+                    {% else %}
+                        {% if form.is_bound %}
+                            {% if field.errors %}
+                                {% render_field field class="form-control is-invalid"%}
+                                {% for error in field.errors %}
+                                    <div class="invalid-feedback text-danger">
+                                         {{ error }}
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                {% render_field field class="form-control is-valid" %}
+                            {% endif %}
+                        {% else %}
+                            {% render_field field class="form-control" %}
+                        {% endif %}
+                    {% endif %}
+
+                    {% if field.help_text %}
+                        <small class="form-text text-primary">{{ field.help_text }}</small>
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            <div class="form-group">
+                <div class="col-sm-12">
+                    <button type="submit" class="btn btn-primary btn-block"><strong>Add Due</strong></button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="col-lg-6">
+        <h3><strong>Due Records</strong></h3>
+        <div class="table-responsive">
+            <table class="table table-striped table-hover" id="dueTable">
+                <thead>
+                    <tr class="info">
+                        <th>Date</th>
+                        <th>Type</th>
+                        <th>Person Name</th>
+                        <th>Particular</th>
+                        <th>Total</th>
+                        <th>Paid</th>
+                        <th>Balance</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for due in dues %}
+                    <tr class="myclass">
+                        <td>{{ due.date|date:"Y-m-d" }}</td>
+                        <td>
+                            {% if due.due_type == 'customer' %}
+                                <span class="due-badge badge-customer">Customer</span>
+                            {% else %}
+                                <span class="due-badge badge-supplier">Supplier</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ due.person_name }}</td>
+                        <td>{{ due.particular }}</td>
+                        <td>{{ due.total_amount }}</td>
+                        <td>{{ due.paid_amount }}</td>
+                        <td>
+                            {% if due.balance_amount > 0 %}
+                                <strong class="text-danger">{{ due.balance_amount }}</strong>
+                            {% else %}
+                                <span class="due-badge badge-paid">Paid</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'dairyapp:due-update' id=due.due_id %}" class="btn btn-sm btn-warning">Edit</a>
+                            <a href="{% url 'dairyapp:due-delete' id=due.due_id %}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this record?')">Delete</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center">No due records found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if dues.has_other_pages %}
+        <ul class="pagination">
+            {% if dues.has_previous %}
+                <li><a href="?page={{ dues.previous_page_number }}">&laquo;</a></li>
+            {% else %}
+                <li class="disabled"><span>&laquo;</span></li>
+            {% endif %}
+            {% for i in dues.paginator.page_range %}
+                {% if dues.number == i %}
+                    <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
+                {% else %}
+                    <li><a href="?page={{ i }}">{{ i }}</a></li>
+                {% endif %}
+            {% endfor %}
+            {% if dues.has_next %}
+                <li><a href="?page={{ dues.next_page_number }}">&raquo;</a></li>
+            {% else %}
+                <li class="disabled"><span>&raquo;</span></li>
+            {% endif %}
+        </ul>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock main-content %}
+
+{% block extra-js %}
+<script>
+    $('#nepalicalendar').nepaliDatePicker({
+        onFocus: true,
+        ndpTriggerButton: false,
+        npdMonth: true,
+        npdYearCount: 10,
+        disableDaysAfter: '1'
+    });
+    
+    $('#dateIconTrigger').on('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        $('#nepalicalendar').focus();
+    });
+
+    $(document).ready(function() {
+        $('#dueTable').DataTable({
+            "paging": false,
+            "searching": true,
+            "ordering": true,
+            "info": false
+        });
+    });
+</script>
+{% endblock %}
