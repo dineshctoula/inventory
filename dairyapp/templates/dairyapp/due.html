@@ -4,234 +4,816 @@
 
 {% block extra-css %}
 <style>
-    .myclass{
-        font-size:large;
+    .due-page-container {
+        background-color: #f5f7fa;
+        min-height: 100vh;
+        padding: 20px 0;
     }
-    .myclass:hover{
-        font-weight:bold;
+    
+    .page-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 25px 30px;
+        border-radius: 8px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
     }
-    .due-summary {
-        background: #f8f9fa;
-        padding: 15px;
-        border-radius: 5px;
-        margin-bottom: 20px;
+    
+    .page-header h2 {
+        margin: 0;
+        font-size: 28px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 12px;
     }
-    .due-badge {
-        display: inline-block;
-        padding: 5px 10px;
-        border-radius: 3px;
-        font-size: 12px;
-        font-weight: bold;
+    
+    .page-header h2 i {
+        font-size: 32px;
     }
-    .badge-customer {
-        background: #28a745;
+    
+    .summary-cards {
+        margin-bottom: 30px;
+    }
+    
+    .summary-card {
+        background: white;
+        border-radius: 10px;
+        padding: 25px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        border-left: 5px solid;
+        height: 100%;
+    }
+    
+    .summary-card.customer {
+        border-left-color: #28a745;
+    }
+    
+    .summary-card.supplier {
+        border-left-color: #dc3545;
+    }
+    
+    .summary-card.net {
+        border-left-color: #17a2b8;
+    }
+    
+    .summary-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    
+    .summary-card-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin: 0;
+    }
+    
+    .summary-card-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
         color: white;
     }
-    .badge-supplier {
-        background: #dc3545;
-        color: white;
+    
+    .summary-card.customer .summary-card-icon {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
     }
-    .badge-paid {
-        background: #6c757d;
-        color: white;
+    
+    .summary-card.supplier .summary-card-icon {
+        background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%);
     }
+    
+    .summary-card.net .summary-card-icon {
+        background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+    }
+    
+    .summary-card-amount {
+        font-size: 32px;
+        font-weight: 700;
+        margin: 0;
+        color: #212529;
+    }
+    
+    .form-card {
+        background: white;
+        border-radius: 10px;
+        padding: 30px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        margin-bottom: 30px;
+        height: 100%;
+    }
+    
+    .form-card-header {
+        border-bottom: 2px solid #e9ecef;
+        padding-bottom: 15px;
+        margin-bottom: 25px;
+    }
+    
+    .form-card-header h3 {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 600;
+        color: #495057;
+    }
+    
+    .form-group label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 8px;
+        font-size: 14px;
+    }
+    
+    .form-control {
+        border: 1px solid #ced4da;
+        border-radius: 6px;
+        padding: 10px 15px;
+        transition: none !important;
+    }
+    
+    .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        transition: none !important;
+    }
+    
+    select.form-control {
+        overflow: visible !important;
+        position: relative;
+        z-index: 1000;
+        height: auto;
+        min-height: 38px;
+        padding-right: 30px;
+    }
+    
+    .form-group {
+        overflow: visible !important;
+        position: relative;
+    }
+    
+    .row {
+        overflow: visible !important;
+        position: relative;
+    }
+    
+    .form-card {
+        overflow: visible !important;
+    }
+    
+    .col-md-6 {
+        overflow: visible !important;
+    }
+    
     .date-icon-trigger {
-        background-color: #007bff !important;
+        background-color: #667eea !important;
         color: white !important;
         cursor: pointer;
-        border-color: #007bff !important;
-        transition: all 0.3s ease;
+        border-color: #667eea !important;
     }
-    .date-icon-trigger:hover {
-        background-color: #0056b3 !important;
-        border-color: #0056b3 !important;
-    }
+    
     .date-icon-trigger i {
         font-size: 16px;
     }
+    
     .input-group .form-control {
         width: 100% !important;
+    }
+    
+    .form-card {
+        overflow: visible !important;
+    }
+    
+    .col-md-6 {
+        overflow: visible !important;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 6px;
+        padding: 12px 30px;
+        font-weight: 600;
+        font-size: 16px;
+        box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
+    }
+    
+    .table-card {
+        background: white;
+        border-radius: 10px;
+        padding: 30px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
+    
+    .table-card-header {
+        border-bottom: 2px solid #e9ecef;
+        padding-bottom: 15px;
+        margin-bottom: 25px;
+    }
+    
+    .table-card-header h3 {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 600;
+        color: #495057;
+    }
+    
+    .table {
+        margin-bottom: 0;
+    }
+    
+    .table thead {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    
+    .table-scrollable {
+        overflow-x: auto;
+        overflow-y: visible;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        width: 100%;
+    }
+    
+    .table-scrollable table {
+        min-width: 100%;
+        width: max-content;
+        white-space: nowrap;
+    }
+    
+    .table-scrollable table thead th,
+    .table-scrollable table tbody td {
+        white-space: nowrap;
+    }
+    
+    .table-scrollable::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+    
+    .table-scrollable::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+    }
+    
+    .table-scrollable::-webkit-scrollbar-thumb {
+        background: #667eea;
+        border-radius: 4px;
+    }
+    
+    
+    .table thead th {
+        border: none;
+        padding: 15px;
+        font-weight: 600;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        white-space: nowrap;
+    }
+    
+    .table tbody tr {
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .table tbody td {
+        padding: 15px;
+        vertical-align: middle;
+        font-size: 14px;
+        white-space: nowrap;
+    }
+    
+    .due-badge {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .badge-customer {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .badge-supplier {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    
+    .badge-paid {
+        background: #e2e3e5;
+        color: #383d41;
+    }
+    
+    .balance-amount {
+        font-weight: 700;
+        font-size: 15px;
+    }
+    
+    .balance-amount.positive {
+        color: #dc3545;
+    }
+    
+    .balance-amount.zero {
+        color: #6c757d;
+    }
+    
+    .btn-sm {
+        padding: 6px 12px;
+        border-radius: 5px;
+        font-weight: 600;
+        font-size: 12px;
+        transition: none !important;
+    }
+    
+    .btn-warning {
+        background-color: #ffc107;
+        border-color: #ffc107;
+        color: #212529;
+        transition: none !important;
+    }
+    
+    .btn-warning:hover {
+        background-color: #ffc107 !important;
+        border-color: #ffc107 !important;
+        color: #212529 !important;
+        transform: none !important;
+        box-shadow: none !important;
+    }
+    
+    .btn-danger {
+        background-color: #dc3545;
+        border-color: #dc3545;
+        transition: none !important;
+    }
+    
+    .btn-danger:hover {
+        background-color: #dc3545 !important;
+        border-color: #dc3545 !important;
+        transform: none !important;
+        box-shadow: none !important;
+    }
+    
+    .btn-info {
+        background-color: #17a2b8;
+        border-color: #17a2b8;
+        color: white;
+        transition: none !important;
+    }
+    
+    .btn-info:hover {
+        background-color: #17a2b8 !important;
+        border-color: #17a2b8 !important;
+        color: white !important;
+        transform: none !important;
+        box-shadow: none !important;
+    }
+    
+    .btn-primary {
+        transition: none !important;
+    }
+    
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3) !important;
+        transform: none !important;
+    }
+    
+    .btn {
+        transition: none !important;
+    }
+    
+    .btn:hover {
+        transition: none !important;
+        transform: none !important;
+    }
+    
+    .btn:focus {
+        transition: none !important;
+        transform: none !important;
+    }
+    
+    .btn:active {
+        transition: none !important;
+        transform: none !important;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 5px;
+        flex-wrap: nowrap;
+        white-space: nowrap;
+    }
+    
+    .action-buttons .btn {
+        margin: 2px 0;
+    }
+    
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+        .print-content, .print-content * {
+            visibility: visible;
+        }
+        .print-content {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+        }
+        .no-print {
+            display: none !important;
+        }
+    }
+    
+    .pagination {
+        margin-top: 20px;
+    }
+    
+    .pagination > li > a,
+    .pagination > li > span {
+        color: #667eea;
+        border-color: #e9ecef;
+        padding: 10px 15px;
+        margin: 0 3px;
+        border-radius: 5px;
+        transition: none !important;
+    }
+    
+    .pagination > li > a:hover {
+        transition: none !important;
+        transform: none !important;
+    }
+    
+    .pagination > .active > span {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-color: #667eea;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 50px 20px;
+        color: #6c757d;
+    }
+    
+    .empty-state i {
+        font-size: 64px;
+        color: #dee2e6;
+        margin-bottom: 20px;
+    }
+    
+    .empty-state p {
+        font-size: 16px;
+        margin: 0;
+    }
+    
+    @media (max-width: 768px) {
+        .summary-card {
+            margin-bottom: 15px;
+        }
+        
+        .page-header h2 {
+            font-size: 22px;
+        }
+        
+        .form-card,
+        .table-card {
+            padding: 20px;
+        }
     }
 </style>
 {% endblock %}
 
 {% block main-content %}
-<div class="row">
-    <div class="col-lg-12">
-        <h2><strong>Due Management (बाँकी व्यवस्थापन)</strong></h2>
-        <hr>
-    </div>
-</div>
-
-<div class="row">
-    <div class="col-lg-3">
-        <div class="due-summary">
-            <h4>Total Customer Due</h4>
-            <h3 class="text-success">NRs. {{ total_customer_due|floatformat:2 }}</h3>
-        </div>
-    </div>
-    <div class="col-lg-3">
-        <div class="due-summary">
-            <h4>Total Supplier Due</h4>
-            <h3 class="text-danger">NRs. {{ total_supplier_due|floatformat:2 }}</h3>
-        </div>
-    </div>
-    <div class="col-lg-3">
-        <div class="due-summary">
-            <h4>Net Receivable</h4>
-            <h3 class="text-info">NRs. {{ net_receivable|floatformat:2 }}</h3>
-        </div>
-    </div>
-</div>
-
-<div class="row">
-    <div class="col-lg-5 col-lg-offset-1">
-        <h3><strong>Add Due Record</strong></h3>
-
-        <form class="form-horizontal" method="POST" enctype="multipart/form-data">
-            {% csrf_token %}
-
-            {{ form.non_field_errors }}
-
-            {% for hidden_field in form.hidden_fields %}
-                {{ hidden_field }}
-            {% endfor %}
-
-            {% if form.non_field_errors %}
-                <div class="alert alert-danger" role="alert">
-                    {% for error in form.non_field_errors %}
-                        {{ error }}
-                    {% endfor %}
-                </div>
-            {% endif %}
-
-            {% for field in form %}
-                <div class="form-group">
-                    {{ field.label_tag }}
-                    {% if field.name == 'date' %}
-                        <div class="input-group">
-                            {% if form.is_bound %}
-                                {% if field.errors %}
-                                    {% render_field field class="form-control is-invalid" id="nepalicalendar"%}
-                                    {% for error in field.errors %}
-                                        <div class="invalid-feedback text-danger">
-                                             {{ error }}
-                                        </div>
-                                    {% endfor %}
-                                {% else %}
-                                    {% render_field field class="form-control is-valid" id="nepalicalendar"%}
-                                {% endif %}
-                            {% else %}
-                                {% render_field field class="form-control" id="nepalicalendar"%}
-                            {% endif %}
-                            <span class="input-group-addon date-icon-trigger" id="dateIconTrigger">
-                                <i class="fa fa-calendar"></i>
-                            </span>
-                        </div>
-                    {% else %}
-                        {% if form.is_bound %}
-                            {% if field.errors %}
-                                {% render_field field class="form-control is-invalid"%}
-                                {% for error in field.errors %}
-                                    <div class="invalid-feedback text-danger">
-                                         {{ error }}
-                                    </div>
-                                {% endfor %}
-                            {% else %}
-                                {% render_field field class="form-control is-valid" %}
-                            {% endif %}
-                        {% else %}
-                            {% render_field field class="form-control" %}
-                        {% endif %}
-                    {% endif %}
-
-                    {% if field.help_text %}
-                        <small class="form-text text-primary">{{ field.help_text }}</small>
-                    {% endif %}
-                </div>
-            {% endfor %}
-
-            <div class="form-group">
-                <div class="col-sm-12">
-                    <button type="submit" class="btn btn-primary btn-block"><strong>Add Due</strong></button>
+<div class="due-page-container">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="page-header">
+                    <h2>
+                        <i class="fa fa-file-text-o"></i>
+                        Due Management (बाँकी व्यवस्थापन)
+                    </h2>
                 </div>
             </div>
-        </form>
-    </div>
-
-    <div class="col-lg-6">
-        <h3><strong>Due Records</strong></h3>
-        <div class="table-responsive">
-            <table class="table table-striped table-hover" id="dueTable">
-                <thead>
-                    <tr class="info">
-                        <th>Date</th>
-                        <th>Type</th>
-                        <th>Person Name</th>
-                        <th>Particular</th>
-                        <th>Total</th>
-                        <th>Paid</th>
-                        <th>Balance</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for due in dues %}
-                    <tr class="myclass">
-                        <td>{{ due.date|date:"Y-m-d" }}</td>
-                        <td>
-                            {% if due.due_type == 'customer' %}
-                                <span class="due-badge badge-customer">Customer</span>
-                            {% else %}
-                                <span class="due-badge badge-supplier">Supplier</span>
-                            {% endif %}
-                        </td>
-                        <td>{{ due.person_name }}</td>
-                        <td>{{ due.particular }}</td>
-                        <td>{{ due.total_amount }}</td>
-                        <td>{{ due.paid_amount }}</td>
-                        <td>
-                            {% if due.balance_amount > 0 %}
-                                <strong class="text-danger">{{ due.balance_amount }}</strong>
-                            {% else %}
-                                <span class="due-badge badge-paid">Paid</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            <a href="{% url 'dairyapp:due-update' id=due.due_id %}" class="btn btn-sm btn-warning">Edit</a>
-                            <a href="{% url 'dairyapp:due-delete' id=due.due_id %}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this record?')">Delete</a>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="8" class="text-center">No due records found.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
         </div>
 
-        {% if dues.has_other_pages %}
-        <ul class="pagination">
-            {% if dues.has_previous %}
-                <li><a href="?page={{ dues.previous_page_number }}">&laquo;</a></li>
-            {% else %}
-                <li class="disabled"><span>&laquo;</span></li>
-            {% endif %}
-            {% for i in dues.paginator.page_range %}
-                {% if dues.number == i %}
-                    <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
-                {% else %}
-                    <li><a href="?page={{ i }}">{{ i }}</a></li>
-                {% endif %}
-            {% endfor %}
-            {% if dues.has_next %}
-                <li><a href="?page={{ dues.next_page_number }}">&raquo;</a></li>
-            {% else %}
-                <li class="disabled"><span>&raquo;</span></li>
-            {% endif %}
-        </ul>
-        {% endif %}
+        <div class="row summary-cards">
+            <div class="col-lg-4 col-md-6">
+                <div class="summary-card customer">
+                    <div class="summary-card-header">
+                        <h4 class="summary-card-title">Total Customer Due</h4>
+                        <div class="summary-card-icon">
+                            <i class="fa fa-users"></i>
+                        </div>
+                    </div>
+                    <h3 class="summary-card-amount text-success">NRs. {{ total_customer_due|floatformat:2 }}</h3>
+                    <p style="margin: 10px 0 0 0; color: #6c757d; font-size: 12px;">Amount customers owe you</p>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="summary-card supplier">
+                    <div class="summary-card-header">
+                        <h4 class="summary-card-title">Total Supplier Due</h4>
+                        <div class="summary-card-icon">
+                            <i class="fa fa-truck"></i>
+                        </div>
+                    </div>
+                    <h3 class="summary-card-amount text-danger">NRs. {{ total_supplier_due|floatformat:2 }}</h3>
+                    <p style="margin: 10px 0 0 0; color: #6c757d; font-size: 12px;">Amount you owe to suppliers</p>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-12">
+                <div class="summary-card net">
+                    <div class="summary-card-header">
+                        <h4 class="summary-card-title">Net Receivable</h4>
+                        <div class="summary-card-icon">
+                            <i class="fa fa-calculator"></i>
+                        </div>
+                    </div>
+                    <h3 class="summary-card-amount text-info">NRs. {{ net_receivable|floatformat:2 }}</h3>
+                    <p style="margin: 10px 0 0 0; color: #6c757d; font-size: 12px;">Net amount receivable</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-5">
+                <div class="form-card">
+                    <div class="form-card-header">
+                        <h3>Add Due Record</h3>
+                    </div>
+
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        {{ form.non_field_errors }}
+
+                        {% for hidden_field in form.hidden_fields %}
+                            {{ hidden_field }}
+                        {% endfor %}
+
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger" role="alert">
+                                <i class="fa fa-exclamation-triangle"></i>
+                                {% for error in form.non_field_errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        {% for field in form %}
+                            <div class="form-group">
+                                {{ field.label_tag }}
+                                {% if field.name == 'date' %}
+                                    <div class="input-group">
+                                        {% if form.is_bound %}
+                                            {% if field.errors %}
+                                                {% render_field field class="form-control is-invalid" id="nepalicalendar"%}
+                                                {% for error in field.errors %}
+                                                    <div class="invalid-feedback text-danger">
+                                                         {{ error }}
+                                                    </div>
+                                                {% endfor %}
+                                            {% else %}
+                                                {% render_field field class="form-control is-valid" id="nepalicalendar"%}
+                                            {% endif %}
+                                        {% else %}
+                                            {% render_field field class="form-control" id="nepalicalendar"%}
+                                        {% endif %}
+                                        <span class="input-group-addon date-icon-trigger" id="dateIconTrigger">
+                                            <i class="fa fa-calendar"></i>
+                                        </span>
+                                    </div>
+                                {% else %}
+                                    {% if form.is_bound %}
+                                        {% if field.errors %}
+                                            {% render_field field class="form-control is-invalid"%}
+                                            {% for error in field.errors %}
+                                                <div class="invalid-feedback text-danger">
+                                                     {{ error }}
+                                                </div>
+                                            {% endfor %}
+                                        {% else %}
+                                            {% render_field field class="form-control is-valid" %}
+                                        {% endif %}
+                                    {% else %}
+                                        {% render_field field class="form-control" %}
+                                    {% endif %}
+                                {% endif %}
+
+                                {% if field.help_text %}
+                                    <small class="form-text text-muted">{{ field.help_text }}</small>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+
+                        <div class="form-group" style="margin-top: 25px;">
+                            <button type="submit" class="btn btn-primary btn-block">
+                                <strong>Add Due</strong>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-lg-7">
+                <div class="table-card">
+                    <div class="table-card-header">
+                        <h3>Due Records</h3>
+                    </div>
+                    
+                    <div class="table-scrollable">
+                        <table class="table table-striped" id="dueTable">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Type</th>
+                                    <th>Person Name</th>
+                                    <th>Particular</th>
+                                    <th>Total</th>
+                                    <th>Paid</th>
+                                    <th>Balance</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for due in dues %}
+                                <tr>
+                                    <td><strong>{{ due.date|date:"Y-m-d" }}</strong></td>
+                                    <td>
+                                        {% if due.due_type == 'customer' %}
+                                            <span class="due-badge badge-customer">Customer</span>
+                                        {% else %}
+                                            <span class="due-badge badge-supplier">Supplier</span>
+                                        {% endif %}
+                                    </td>
+                                    <td><strong>{{ due.person_name }}</strong></td>
+                                    <td>{{ due.particular }}</td>
+                                    <td>NRs. {{ due.total_amount|floatformat:2 }}</td>
+                                    <td>NRs. {{ due.paid_amount|floatformat:2 }}</td>
+                                    <td>
+                                        {% if due.balance_amount > 0 %}
+                                            <span class="balance-amount positive">NRs. {{ due.balance_amount|floatformat:2 }}</span>
+                                        {% else %}
+                                            <span class="due-badge badge-paid">Paid</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <a href="{% url 'dairyapp:due-update' id=due.due_id %}" class="btn btn-sm btn-warning" title="Edit">
+                                                <i class="fa fa-edit"></i> Edit
+                                            </a>
+                                            <button type="button" class="btn btn-sm btn-info" onclick="printDueRecord({{ due.due_id }})" title="Print">
+                                                <i class="fa fa-print"></i> Print
+                                            </button>
+                                            <a href="{% url 'dairyapp:due-delete' id=due.due_id %}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this record?')" title="Delete">
+                                                <i class="fa fa-trash"></i> Delete
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="8">
+                                        <div class="empty-state">
+                                            <i class="fa fa-inbox"></i>
+                                            <p>No due records found. Start by adding a new due record.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    {% for due in dues %}
+                    <div id="printContent-{{ due.due_id }}" class="print-content" style="display: none;">
+                        <div class="ticket-slip">
+                            <div class="ticket-header">
+                                <div class="ticket-title">DUE RECEIPT</div>
+                                <div class="ticket-subtitle">Dairy Management System</div>
+                            </div>
+                            
+                            <div class="ticket-divider">--------------------------------</div>
+                            
+                            <div class="ticket-content">
+                                <div class="ticket-row">
+                                    <span class="ticket-label">ID:</span>
+                                    <span class="ticket-value">#{{ due.due_id }}</span>
+                                </div>
+                                
+                                <div class="ticket-row">
+                                    <span class="ticket-label">Date:</span>
+                                    <span class="ticket-value">{{ due.date|date:"Y-m-d" }}</span>
+                                </div>
+                                
+                                <div class="ticket-row">
+                                    <span class="ticket-label">Type:</span>
+                                    <span class="ticket-value">
+                                        {% if due.due_type == 'customer' %}
+                                            <span class="type-badge customer">CUSTOMER</span>
+                                        {% else %}
+                                            <span class="type-badge supplier">SUPPLIER</span>
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                
+                                <div class="ticket-divider">--------------------------------</div>
+                                
+                                <div class="ticket-row highlight">
+                                    <span class="ticket-label">Name:</span>
+                                    <span class="ticket-value-bold">{{ due.person_name }}</span>
+                                </div>
+                                
+                                <div class="ticket-row">
+                                    <span class="ticket-label">Particular:</span>
+                                    <span class="ticket-value-small">{{ due.particular }}</span>
+                                </div>
+                                
+                                <div class="ticket-divider">--------------------------------</div>
+                                
+                                <div class="ticket-row">
+                                    <span class="ticket-label">Total:</span>
+                                    <span class="ticket-value">NRs. {{ due.total_amount|floatformat:2 }}</span>
+                                </div>
+                                
+                                <div class="ticket-row">
+                                    <span class="ticket-label">Paid:</span>
+                                    <span class="ticket-value">NRs. {{ due.paid_amount|floatformat:2 }}</span>
+                                </div>
+                                
+                                <div class="ticket-row balance-row">
+                                    <span class="ticket-label">Balance:</span>
+                                    <span class="ticket-value-balance {% if due.balance_amount > 0 %}balance-due{% else %}balance-paid{% endif %}">
+                                        {% if due.balance_amount > 0 %}
+                                            NRs. {{ due.balance_amount|floatformat:2 }}
+                                        {% else %}
+                                            PAID
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                
+                                {% if due.remarks %}
+                                <div class="ticket-divider">--------------------------------</div>
+                                <div class="ticket-row">
+                                    <span class="ticket-label-small">Remarks:</span>
+                                    <span class="ticket-value-small">{{ due.remarks }}</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="ticket-divider">--------------------------------</div>
+                            
+                            <div class="ticket-footer">
+                                <div class="ticket-date">Date: <span id="printDate-{{ due.due_id }}"></span></div>
+                                <div class="ticket-thank">Thank You!</div>
+                            </div>
+                            
+                            <div class="ticket-cut-line">━━━━━━━━━━━━━━━━━━━━━━━━━━</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                    {% if dues.has_other_pages %}
+                    <ul class="pagination">
+                        {% if dues.has_previous %}
+                            <li><a href="?page={{ dues.previous_page_number }}">&laquo;</a></li>
+                        {% else %}
+                            <li class="disabled"><span>&laquo;</span></li>
+                        {% endif %}
+                        {% for i in dues.paginator.page_range %}
+                            {% if dues.number == i %}
+                                <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
+                            {% else %}
+                                <li><a href="?page={{ i }}">{{ i }}</a></li>
+                            {% endif %}
+                        {% endfor %}
+                        {% if dues.has_next %}
+                            <li><a href="?page={{ dues.next_page_number }}">&raquo;</a></li>
+                        {% else %}
+                            <li class="disabled"><span>&raquo;</span></li>
+                        {% endif %}
+                    </ul>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -253,12 +835,202 @@
         $('#nepalicalendar').focus();
     });
 
+    function printDueRecord(dueId) {
+        var printContent = document.getElementById('printContent-' + dueId);
+        var printDate = document.getElementById('printDate-' + dueId);
+        
+        if (!printContent) {
+            alert('Print content not found!');
+            return;
+        }
+        
+        if (printDate) {
+            var now = new Date();
+            var dateStr = now.toLocaleDateString() + ' ' + now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            printDate.textContent = dateStr;
+        }
+        
+        var printWindow = window.open('', '_blank');
+        var content = printContent.innerHTML;
+        
+        var ticketStyles = `
+            <style>
+                @page {
+                    size: 80mm auto;
+                    margin: 5mm;
+                }
+                * {
+                    margin: 0;
+                    padding: 0;
+                    box-sizing: border-box;
+                }
+                body {
+                    margin: 0;
+                    padding: 8px;
+                    font-family: 'Courier New', monospace;
+                    font-size: 11px;
+                    width: 80mm;
+                    background: white;
+                }
+                .ticket-slip {
+                    width: 100%;
+                    max-width: 70mm;
+                    margin: 0 auto;
+                    padding: 5px;
+                    border: 1px dashed #ccc;
+                }
+                .ticket-header {
+                    text-align: center;
+                    margin-bottom: 5px;
+                }
+                .ticket-title {
+                    font-size: 14px;
+                    font-weight: bold;
+                    letter-spacing: 1px;
+                    margin-bottom: 2px;
+                }
+                .ticket-subtitle {
+                    font-size: 9px;
+                    color: #666;
+                }
+                .ticket-divider {
+                    text-align: center;
+                    color: #ccc;
+                    font-size: 9px;
+                    margin: 5px 0;
+                    letter-spacing: 1px;
+                }
+                .ticket-content {
+                    margin: 5px 0;
+                }
+                .ticket-row {
+                    display: flex;
+                    justify-content: space-between;
+                    margin: 4px 0;
+                    font-size: 10px;
+                }
+                .ticket-row.highlight {
+                    margin: 6px 0;
+                }
+                .ticket-label {
+                    font-weight: bold;
+                    min-width: 60px;
+                }
+                .ticket-label-small {
+                    font-weight: bold;
+                    font-size: 9px;
+                    min-width: 60px;
+                }
+                .ticket-value {
+                    text-align: right;
+                    flex: 1;
+                }
+                .ticket-value-bold {
+                    text-align: right;
+                    flex: 1;
+                    font-weight: bold;
+                    font-size: 11px;
+                }
+                .ticket-value-small {
+                    text-align: right;
+                    flex: 1;
+                    font-size: 9px;
+                }
+                .ticket-value-balance {
+                    text-align: right;
+                    flex: 1;
+                    font-weight: bold;
+                    font-size: 12px;
+                }
+                .balance-row {
+                    margin-top: 8px;
+                    padding-top: 5px;
+                    border-top: 1px dashed #ccc;
+                }
+                .balance-due {
+                    color: #dc3545;
+                }
+                .balance-paid {
+                    color: #28a745;
+                }
+                .type-badge {
+                    padding: 2px 6px;
+                    border-radius: 3px;
+                    font-size: 8px;
+                    font-weight: bold;
+                }
+                .type-badge.customer {
+                    background: #d4edda;
+                    color: #155724;
+                }
+                .type-badge.supplier {
+                    background: #f8d7da;
+                    color: #721c24;
+                }
+                .ticket-footer {
+                    text-align: center;
+                    margin-top: 5px;
+                    font-size: 9px;
+                }
+                .ticket-date {
+                    margin-bottom: 3px;
+                    color: #666;
+                }
+                .ticket-thank {
+                    font-weight: bold;
+                    margin-top: 3px;
+                }
+                .ticket-cut-line {
+                    text-align: center;
+                    color: #999;
+                    font-size: 8px;
+                    margin-top: 8px;
+                    padding-top: 5px;
+                    border-top: 1px dashed #ccc;
+                }
+                @media print {
+                    body {
+                        margin: 0;
+                        padding: 5mm;
+                    }
+                    .ticket-slip {
+                        border: none;
+                        padding: 0;
+                    }
+                    .ticket-cut-line {
+                        page-break-after: always;
+                    }
+                }
+            </style>
+        `;
+        
+        printWindow.document.write('<!DOCTYPE html><html><head><title>Due Receipt</title><meta charset="UTF-8">');
+        printWindow.document.write(ticketStyles);
+        printWindow.document.write('</head><body>');
+        printWindow.document.write(content);
+        printWindow.document.write('</body></html>');
+        printWindow.document.close();
+        
+        printWindow.onload = function() {
+            setTimeout(function() {
+                printWindow.print();
+                setTimeout(function() {
+                    printWindow.close();
+                }, 100);
+            }, 250);
+        };
+    }
+
     $(document).ready(function() {
         $('#dueTable').DataTable({
             "paging": false,
-            "searching": true,
+            "searching": false,
             "ordering": true,
-            "info": false
+            "info": false,
+            "order": [[ 0, "desc" ]],
+            "scrollY": false,
+            "scrollCollapse": false,
+            "dom": 'rt'
         });
     });
 </script>
