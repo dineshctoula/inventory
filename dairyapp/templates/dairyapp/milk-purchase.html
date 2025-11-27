@@ -124,10 +124,15 @@
                             <td>{{purchase.mPurchase_rate}}</td>
                             <td>{% if purchase.snf %}{{ purchase.snf|floatformat:2 }}{% else %}-{% endif %}</td>
                             <td>{{ purchase.mPurchase_total }}</td>
-                            <td onclick="if (!confirm('Do you want to confirm?')) { return false }">
-                                <a class="btn btn-success" href="{% url 'dairyapp:delete-purchase' id=purchase.mPurchase_id %}">
-                                    <i class="fa fa-times"></i>
-                                </a>
+                            <td>
+                                <div style="display: flex; gap: 5px;">
+                                    <button type="button" class="btn btn-info btn-sm" onclick="printPurchaseRecord({{ purchase.mPurchase_id }})" title="Print">
+                                        <i class="fa fa-print"></i> Print
+                                    </button>
+                                    <a class="btn btn-danger btn-sm" href="{% url 'dairyapp:delete-purchase' id=purchase.mPurchase_id %}" onclick="return confirm('Do you want to confirm?')" title="Delete">
+                                        <i class="fa fa-times"></i>
+                                    </a>
+                                </div>
                             </td>
                         </tr>
 
@@ -181,6 +186,77 @@
         </div>
     </div>
 
+    <!-- Print content for each purchase record -->
+    {% for purchase in milk %}
+    <div id="printContent-{{ purchase.mPurchase_id }}" class="print-content" style="display: none;">
+        <div class="ticket-slip">
+            <div class="ticket-header">
+                <div class="ticket-title">MILK PURCHASE RECEIPT</div>
+                <div class="ticket-subtitle">Dairy Management System</div>
+            </div>
+            
+            <div class="ticket-divider">--------------------------------</div>
+            
+            <div class="ticket-content">
+                <div class="ticket-row">
+                    <span class="ticket-label">ID:</span>
+                    <span class="ticket-value">#{{ purchase.mPurchase_id }}</span>
+                </div>
+                
+                <div class="ticket-row">
+                    <span class="ticket-label">Date:</span>
+                    <span class="ticket-value">{{ purchase.mPurchase_date|date:"Y-m-d" }}</span>
+                </div>
+                
+                <div class="ticket-divider">--------------------------------</div>
+                
+                <div class="ticket-row highlight">
+                    <span class="ticket-label">Seller:</span>
+                    <span class="ticket-value-bold">{{ purchase.seller }}</span>
+                </div>
+                
+                <div class="ticket-row">
+                    <span class="ticket-label">Milk Type:</span>
+                    <span class="ticket-value">{{ purchase.mPurchase_product }}</span>
+                </div>
+                
+                {% if purchase.snf %}
+                <div class="ticket-row">
+                    <span class="ticket-label">SNF:</span>
+                    <span class="ticket-value">{{ purchase.snf|floatformat:2 }}</span>
+                </div>
+                {% endif %}
+                
+                <div class="ticket-divider">--------------------------------</div>
+                
+                <div class="ticket-row">
+                    <span class="ticket-label">Quantity:</span>
+                    <span class="ticket-value">{{ purchase.mPurchase_qty|floatformat:2 }} ltr</span>
+                </div>
+                
+                <div class="ticket-row">
+                    <span class="ticket-label">Rate/Ltr:</span>
+                    <span class="ticket-value">NRs. {{ purchase.mPurchase_rate|floatformat:2 }}</span>
+                </div>
+                
+                <div class="ticket-row balance-row">
+                    <span class="ticket-label">Total Amount:</span>
+                    <span class="ticket-value-balance">NRs. {{ purchase.mPurchase_total|floatformat:2 }}</span>
+                </div>
+            </div>
+            
+            <div class="ticket-divider">--------------------------------</div>
+            
+            <div class="ticket-footer">
+                <div class="ticket-date">Printed: <span id="printDate-{{ purchase.mPurchase_id }}"></span></div>
+                <div class="ticket-thank">Thank You!</div>
+            </div>
+            
+            <div class="ticket-cut-line">━━━━━━━━━━━━━━━━━━━━━━━━━━</div>
+        </div>
+    </div>
+    {% endfor %}
+
 {% endblock %}
 
 {% block extra-js %}
@@ -198,6 +274,161 @@
 
         });
 
+    function printPurchaseRecord(purchaseId) {
+        var printContent = document.getElementById('printContent-' + purchaseId);
+        var printDate = document.getElementById('printDate-' + purchaseId);
+        
+        if (!printContent) {
+            alert('Print content not found!');
+            return;
+        }
+        
+        if (printDate) {
+            var now = new Date();
+            var dateStr = now.toLocaleDateString() + ' ' + now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            printDate.textContent = dateStr;
+        }
+        
+        var printWindow = window.open('', '_blank');
+        var content = printContent.innerHTML;
+        
+        var ticketStyles = `
+            <style>
+                @page {
+                    size: 80mm auto;
+                    margin: 5mm;
+                }
+                * {
+                    margin: 0;
+                    padding: 0;
+                    box-sizing: border-box;
+                }
+                body {
+                    margin: 0;
+                    padding: 8px;
+                    font-family: 'Courier New', monospace;
+                    font-size: 11px;
+                    width: 80mm;
+                    background: white;
+                }
+                .ticket-slip {
+                    width: 100%;
+                    max-width: 70mm;
+                    margin: 0 auto;
+                    padding: 5px;
+                    border: 1px dashed #ccc;
+                }
+                .ticket-header {
+                    text-align: center;
+                    margin-bottom: 5px;
+                }
+                .ticket-title {
+                    font-size: 14px;
+                    font-weight: bold;
+                    letter-spacing: 1px;
+                    margin-bottom: 2px;
+                }
+                .ticket-subtitle {
+                    font-size: 9px;
+                    color: #666;
+                }
+                .ticket-divider {
+                    text-align: center;
+                    color: #ccc;
+                    font-size: 9px;
+                    margin: 5px 0;
+                    letter-spacing: 1px;
+                }
+                .ticket-content {
+                    margin: 5px 0;
+                }
+                .ticket-row {
+                    display: flex;
+                    justify-content: space-between;
+                    margin: 4px 0;
+                    font-size: 10px;
+                }
+                .ticket-row.highlight {
+                    margin: 6px 0;
+                }
+                .ticket-label {
+                    font-weight: bold;
+                    min-width: 60px;
+                }
+                .ticket-value {
+                    text-align: right;
+                    flex: 1;
+                }
+                .ticket-value-bold {
+                    text-align: right;
+                    flex: 1;
+                    font-weight: bold;
+                    font-size: 11px;
+                }
+                .ticket-value-balance {
+                    text-align: right;
+                    flex: 1;
+                    font-weight: bold;
+                    font-size: 12px;
+                }
+                .balance-row {
+                    margin-top: 8px;
+                    padding-top: 5px;
+                    border-top: 1px dashed #ccc;
+                }
+                .ticket-footer {
+                    text-align: center;
+                    margin-top: 5px;
+                    font-size: 9px;
+                }
+                .ticket-date {
+                    margin-bottom: 3px;
+                    color: #666;
+                }
+                .ticket-thank {
+                    font-weight: bold;
+                    margin-top: 3px;
+                }
+                .ticket-cut-line {
+                    text-align: center;
+                    color: #999;
+                    font-size: 8px;
+                    margin-top: 8px;
+                    padding-top: 5px;
+                    border-top: 1px dashed #ccc;
+                }
+                @media print {
+                    body {
+                        margin: 0;
+                        padding: 5mm;
+                    }
+                    .ticket-slip {
+                        border: none;
+                        padding: 0;
+                    }
+                    .ticket-cut-line {
+                        page-break-after: always;
+                    }
+                }
+            </style>
+        `;
+        
+        printWindow.document.write('<!DOCTYPE html><html><head><title>Purchase Receipt</title><meta charset="UTF-8">');
+        printWindow.document.write(ticketStyles);
+        printWindow.document.write('</head><body>');
+        printWindow.document.write(content);
+        printWindow.document.write('</body></html>');
+        printWindow.document.close();
+        
+        printWindow.onload = function() {
+            setTimeout(function() {
+                printWindow.print();
+                setTimeout(function() {
+                    printWindow.close();
+                }, 100);
+            }, 250);
+        };
+    }
 
 </script>
 
