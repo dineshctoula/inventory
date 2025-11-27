@@ -86,11 +86,21 @@
         <!-- Header -->
         <header class="header dark-bg">
             <div class="row">
-                <div class="col-lg-8">
+                <div class="col-lg-6">
                     <a href="#" class="logo">Prekshya-Prasikshya Doodh Dairy</a>
                 </div>
-                <div class="col-lg-4">
+                <div class="col-lg-3">
                     <h3>आजको मिती: {{ bs_date }}</h3>
+                </div>
+                <div class="col-lg-3" style="text-align: right; padding-top: 10px;">
+                    {% if user.is_authenticated %}
+                        <span style="color: white; margin-right: 15px;">
+                            <i class="fa fa-user"></i> {{ user.email }}
+                        </span>
+                        <a href="{% url 'accounts:logout' %}" style="color: white; text-decoration: none;">
+                            <i class="fa fa-sign-out"></i> Logout
+                        </a>
+                    {% endif %}
                 </div>
             </div>
         </header>
