@@ -44,7 +44,7 @@ def milkPurchase(request):
     paginator = Paginator(milk_list, 10)
 
     try:
-        milk = paginator.page(page)
+        milk = paginator.page(pageff)
     except PageNotAnInteger:
         milk = paginator.page(1)
     except EmptyPage:

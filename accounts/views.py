@@ -14,6 +14,7 @@ def login_view(request):
         
         if email and password:
             user = authenticate(request, username=email, password=password, email=email)
+
             if user is not None:
                 login(request, user)
                 messages.success(request, f'Welcome back, {user.get_full_name() or user.email}!')
@@ -38,4 +39,5 @@ def logout_view(request):
     response['Pragma'] = 'no-cache'
     response['Expires'] = '0'
     return response
+
 

@@ -10,7 +10,7 @@
     
     <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    
+
     <title>Login - Dairy Management System</title>
     
     <style>
@@ -253,6 +253,7 @@
         }
         .login-toast-message.hide {
             animation: slideOutRight 0.3s ease-out forwards !important;
+
         }
     </style>
 </head>
@@ -265,7 +266,6 @@
             <h2>Dairy Management System</h2>
             <p>Owner Login</p>
         </div>
-        
         <form method="POST" action="{% url 'accounts:login' %}">
             {% csrf_token %}
             <div class="form-group">
@@ -300,11 +300,11 @@
             
             <button type="submit" class="btn btn-login" id="loginButton">
                 <i class="fa fa-spinner fa-spin spinner"></i>
+
                 <i class="fa fa-sign-in"></i> Login
             </button>
         </form>
     </div>
-    
     <div class="login-toast-container" id="loginToastContainer">
         {% if messages %}
             {% for message in messages %}
@@ -417,6 +417,7 @@
             }
         });
     </script>
+
     <script src="{% static 'js/jquery.js' %}"></script>
     <script src="{% static 'js/bootstrap.min.js' %}"></script>
 </body>
