@@ -3,14 +3,16 @@ from .models import mPurchase,mProduct,mStock, mProductSell, mProduct, mProductU
 from .models import operationCost as operationCostModel
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.views import generic
 from django.urls import reverse_lazy
 from django.core.paginator import Paginator
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from bootstrap_modal_forms.mixins import PassRequestMixin
 
 
-## index view
+@login_required
 def index(request):
     title='DAIRY'
     context={
@@ -18,7 +20,7 @@ def index(request):
     }
     return render(request,'dairyapp/index.html',context)
 
-##milk purchase view
+@login_required
 def milkPurchase(request):
     title='Buy Milk'
     milk_list = mPurchase.objects.all().order_by('-mPurchase_date')
@@ -57,13 +59,13 @@ def milkPurchase(request):
 
     return render(request,'dairyapp/milk-purchase.html',context)
 
-## Delete Purchase Information
+@login_required
 def milkPurchaseDelete(request,id):
     mPurchase.objects.get(mPurchase_id=id).delete()
     return redirect('/milkpurchase')
 
 
-### stock add
+@login_required
 def addMilkProducts(request):
     title='Add Milk Products'
     product=mProduct.objects.all().order_by('-mProduct_name')
@@ -95,7 +97,7 @@ def addMilkProducts(request):
     }
     return render(request,'dairyapp/add-milk-products.html',context)
 
-## Detail view for stock records
+@login_required
 def mStockDetailView(request,id):
     model=mStock
     m=get_object_or_404(mProduct,mProduct_id=id)
@@ -135,7 +137,7 @@ def mStockDetailView(request,id):
 
     #return render(request, 'dairyapp/stock-details.html', context)
 
-## sell milk products view
+@login_required
 def sellMilkProducts(request):
     title='Sell Milk Products'
     sales_list=mProductSell.objects.all().order_by('-mProductSell_date')
@@ -186,7 +188,7 @@ def sellMilkProducts(request):
     return render(request,'dairyapp/sell-milk-products.html',context)
 
 
-## Delete sales record of a product
+@login_required
 def mProductSellDelete(request,id):
 
     sale=mProductSell.objects.get(mProductSell_id=id)
@@ -198,7 +200,7 @@ def mProductSellDelete(request,id):
 
     return redirect('/sellmilkproducts')
 
-## operation cost view
+@login_required
 def operationCost(request):
     title='Operation Cost'
     operations_list=operationCostModel.objects.all().order_by('-date')
@@ -240,13 +242,12 @@ def operationCost(request):
     }
     return render(request,'dairyapp/operationcost.html',context)
 
-## Delete Operation Cost Records
+@login_required
 def deleteOperationCost(request,id):
     operationCostModel.objects.get(operationCost_id=id).delete()
     return redirect('/operationcost')
 
-## Report Page
-
+@login_required
 def report(request):
     title='REPORT'
     context={
@@ -254,7 +255,7 @@ def report(request):
     }
     return render(request,'dairyapp/report.html',context)
 
-## purchase report
+@login_required
 def purchaseReport(request):
     title='Purchase Report'
     milk=mPurchase.objects.all().order_by('-mPurchase_date')[:10]
@@ -285,7 +286,7 @@ def purchaseReport(request):
     }
     return render(request,'dairyapp/purchase-report.html',context)
 
-##stock report
+@login_required
 def stockReport(request):
     title='Stock Report'
     stock = mStock.objects.all().order_by('-mStock_date')[:10]
@@ -316,7 +317,7 @@ def stockReport(request):
     }
     return render(request, 'dairyapp/stock-report.html',context)
 
-##sales report
+@login_required
 def salesReport(request):
     title='Sales Report'
 
@@ -350,7 +351,7 @@ def salesReport(request):
     return render(request,'dairyapp/sales-report.html',context)
 
 
-## opeartion cost report
+@login_required
 def operationCostReport(request):
     title='Operation Cost Report'
     operations = operationCostModel.objects.all().order_by('-date')[:10]
@@ -381,7 +382,7 @@ def operationCostReport(request):
     }
     return render(request,'dairyapp/operationcost-report.html',context)
 
-## settings view
+@login_required
 def settings(request):
     title='Settings'
 
@@ -397,14 +398,14 @@ def settings(request):
     return  render(request,'dairyapp/settings/index.html',context)
 
 ## create/add new product name view
-class newProductCreateView(PassRequestMixin, SuccessMessageMixin,
+class newProductCreateView(LoginRequiredMixin, PassRequestMixin, SuccessMessageMixin,
                      generic.CreateView):
     template_name = 'dairyapp/settings/add-product.html'
     form_class = addProductForm
     success_message = 'Success: Product was created.'
     success_url = '/settings/'
 
-##create/add new product unit name view
+@login_required
 def newProductUnitCreate(request):
     title='Create New Product Unit'
 
@@ -426,6 +427,7 @@ def newProductUnitCreate(request):
 
     return render(request,'dairyapp/settings/add-unit.html',context)
 
+@login_required
 def test(request):
     title='TEST'
 

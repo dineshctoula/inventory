@@ -76,6 +76,131 @@
             color: #fff;
             margin: 5px 0;
         }
+        
+        .toast-container {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            z-index: 9999;
+            width: 350px;
+            max-width: calc(100% - 40px);
+        }
+        
+        .toast-message {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            margin-bottom: 15px;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            animation: slideInRight 0.3s ease-out;
+            position: relative;
+            border-left: 4px solid;
+            min-height: 60px;
+        }
+        
+        .toast-message.success {
+            border-left-color: #28a745;
+            background: #d4edda;
+        }
+        
+        .toast-message.error {
+            border-left-color: #dc3545;
+            background: #f8d7da;
+        }
+        
+        .toast-message.warning {
+            border-left-color: #ffc107;
+            background: #fff3cd;
+        }
+        
+        .toast-message.info {
+            border-left-color: #17a2b8;
+            background: #d1ecf1;
+        }
+        
+        .toast-message.debug {
+            border-left-color: #6c757d;
+            background: #d6d8db;
+        }
+        
+        .toast-icon {
+            font-size: 24px;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        
+        .toast-message.success .toast-icon {
+            color: #28a745;
+        }
+        
+        .toast-message.error .toast-icon {
+            color: #dc3545;
+        }
+        
+        .toast-message.warning .toast-icon {
+            color: #ffc107;
+        }
+        
+        .toast-message.info .toast-icon {
+            color: #17a2b8;
+        }
+        
+        .toast-message.debug .toast-icon {
+            color: #6c757d;
+        }
+        
+        .toast-content {
+            flex: 1;
+            color: #333;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .toast-close {
+            background: none;
+            border: none;
+            color: #666;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 0;
+            margin-left: 15px;
+            line-height: 1;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+            flex-shrink: 0;
+        }
+        
+        .toast-close:hover {
+            opacity: 1;
+        }
+        
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+        
+        .toast-message.hide {
+            animation: slideOutRight 0.3s ease-out forwards;
+        }
     </style>
 </head>
 <body>
@@ -86,11 +211,21 @@
         <!-- Header -->
         <header class="header dark-bg">
             <div class="row">
-                <div class="col-lg-8">
+                <div class="col-lg-6">
                     <a href="#" class="logo">Prekshya-Prasikshya Doodh Dairy</a>
                 </div>
-                <div class="col-lg-4">
+                <div class="col-lg-3">
                     <h3>आजको मिती: {{ bs_date }}</h3>
+                </div>
+                <div class="col-lg-3" style="text-align: right; padding-top: 10px;">
+                    {% if user.is_authenticated %}
+                        <span style="color: white; margin-right: 15px;">
+                            <i class="fa fa-user"></i> {{ user.email }}
+                        </span>
+                        <a href="{% url 'accounts:logout' %}" style="color: white; text-decoration: none;">
+                            <i class="fa fa-sign-out"></i> Logout
+                        </a>
+                    {% endif %}
                 </div>
             </div>
         </header>
@@ -131,11 +266,64 @@
         </section>
 
     </section>
+    
+    <div class="toast-container" id="toastContainer">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="toast-message {{ message.tags }}" data-message-id="{{ forloop.counter }}">
+                    {% if message.tags == 'success' %}
+                        <i class="fa fa-check-circle toast-icon"></i>
+                    {% elif message.tags == 'error' or message.tags == 'danger' %}
+                        <i class="fa fa-exclamation-circle toast-icon"></i>
+                    {% elif message.tags == 'warning' %}
+                        <i class="fa fa-exclamation-triangle toast-icon"></i>
+                    {% elif message.tags == 'info' %}
+                        <i class="fa fa-info-circle toast-icon"></i>
+                    {% else %}
+                        <i class="fa fa-bell toast-icon"></i>
+                    {% endif %}
+                    <div class="toast-content">
+                        {{ message }}
+                    </div>
+                    <button class="toast-close" onclick="closeToast(this)">&times;</button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
 
     <!-- JS Files -->
     <script src="{% static 'js/bootstrap.min.js' %}"></script>
     <script src="{% static 'js/jquery.scrollTo.min.js' %}"></script>
     <script src="{% static 'js/jquery.nicescroll.js' %}"></script>
+    
+    <script>
+        function closeToast(button) {
+            var toast = button.closest('.toast-message');
+            if (toast) {
+                toast.classList.add('hide');
+                setTimeout(function() {
+                    toast.remove();
+                }, 300);
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            var toasts = document.querySelectorAll('.toast-message');
+            toasts.forEach(function(toast) {
+                var closeBtn = toast.querySelector('.toast-close');
+                setTimeout(function() {
+                    if (closeBtn) {
+                        closeToast(closeBtn);
+                    } else {
+                        toast.classList.add('hide');
+                        setTimeout(function() {
+                            toast.remove();
+                        }, 300);
+                    }
+                }, 5000);
+            });
+        });
+    </script>
 
     {% block extra-js %}{% endblock %}
 

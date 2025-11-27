@@ -16,6 +16,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'accounts.apps.AccountsConfig',
     'dairyapp.apps.DairyappConfig',
     'bootstrap_modal_forms',
     'widget_tweaks',
@@ -54,6 +55,15 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'dairy.wsgi.application'
+
+AUTHENTICATION_BACKENDS = [
+    'accounts.backends.EmailBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
+
+LOGIN_URL = '/accounts/login/'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/accounts/login/'
 
 # Database configuration
 DATABASES = {
