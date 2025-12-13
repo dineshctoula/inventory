@@ -16,6 +16,27 @@ class Customer(models.Model):
         return self.customer_name
 
 
+class Seller(models.Model):
+    seller_id = models.AutoField(primary_key=True)
+    seller_name = models.CharField(max_length=50, unique=True)
+    seller_address = models.CharField(max_length=200, blank=True, null=True)
+    seller_contact = models.CharField(max_length=20, blank=True, null=True)
+    created_date = models.DateField(default=datetime.date.today)
+    
+    # Default rates for this seller (optional, can override per purchase)
+    default_fat_rate_per_kg = models.FloatField(default=7.15, blank=True, null=True, help_text="Default Fat Rate per kg")
+    default_snf_rate_per_kg = models.FloatField(default=4.55, blank=True, null=True, help_text="Default SNF Rate per kg")
+    default_total_solids_per_kg = models.FloatField(default=10.0, blank=True, null=True, help_text="Default Total Solids per kg (%)")
+    
+    remarks = models.TextField(blank=True, null=True)
+    
+    def __str__(self):
+        return self.seller_name
+    
+    class Meta:
+        ordering = ['seller_name']
+
+
 ## Milk Product Units
 class mProductUnit(models.Model):
     mProductUnit_id=models.AutoField(primary_key=True)

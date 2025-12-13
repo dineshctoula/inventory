@@ -1,0 +1,9 @@
+Format monthly report header to match PDF format exactly
+
+- Center all header elements (company name, address, PAN, party info)
+- Update party name format to "PARTY'S NAME:-{{ seller_name }}" to match PDF
+- Center summary box instead of floating right
+- Improve print CSS with reduced margins to minimize URL visibility
+- Update document title in print function for better print output
+- Ensure all header text is properly centered and matches PDF layout
+

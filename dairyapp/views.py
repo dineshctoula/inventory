@@ -1,5 +1,5 @@
-from .forms import mPurchaseForm,mStockForm,mProductSellForm, operationCostForm,testForm,dateForm, addProductForm,addProductUnitForm,DueForm
-from .models import mPurchase,mProduct,mStock, mProductSell, mProduct, mProductUnit,test,Due
+from .forms import mPurchaseForm,mStockForm,mProductSellForm, operationCostForm,testForm,dateForm, addProductForm,addProductUnitForm,DueForm,MonthlyReportForm,SellerForm
+from .models import mPurchase,mProduct,mStock, mProductSell, mProduct, mProductUnit,test,Due,Seller
 from .models import operationCost as operationCostModel
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
@@ -10,6 +10,9 @@ from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from bootstrap_modal_forms.mixins import PassRequestMixin
+from django.db.models import Sum, Count, Q
+import datetime
+import calendar
 
 
 @login_required
@@ -29,10 +32,6 @@ def milkPurchase(request):
         form=mPurchaseForm(request.POST)
         if form.is_valid():
             m=form.save(commit=False)
-            ## gives object bound to form
-            ## commit = False means it gives object that has not been saved in db yet
-            ##m.mPurchase_date=timezone.now()
-            # All calculations are now done in the model's save() method
             m.save()
             messages.success(request, 'Purchase record added successfully.')
             return redirect('/milkpurchase')
@@ -51,7 +50,6 @@ def milkPurchase(request):
     except EmptyPage:
         milk = paginator.page(paginator.num_pages)
 
-    # Calculate totals for current page
     totals = {
         'total_qty': sum([p.mPurchase_qty for p in milk if p.mPurchase_qty]),
         'total_ts_amount': sum([p.ts_amount for p in milk if p.ts_amount]),
@@ -59,7 +57,6 @@ def milkPurchase(request):
         'total_advance': sum([p.advance_amount for p in milk if p.advance_amount]),
     }
     
-    # Calculate seller-wise advance tracking (all purchases, not just current page)
     seller_advance_info = {}
     all_purchases = mPurchase.objects.all()
     for purchase in all_purchases:
@@ -73,17 +70,12 @@ def milkPurchase(request):
         seller_advance_info[seller]['total_advance'] += purchase.advance_amount or 0
         seller_advance_info[seller]['total_purchase'] += purchase.mPurchase_total or 0
     
-    # Calculate remaining balance for each seller
-    # Remaining = Purchase Amount - Advance Given
-    # Positive = You still owe this amount to seller
-    # Negative = You overpaid (advance exceeds purchase)
     for seller in seller_advance_info:
         seller_advance_info[seller]['remaining_balance'] = (
             seller_advance_info[seller]['total_purchase'] - 
             seller_advance_info[seller]['total_advance']
         )
     
-    # Add remaining balance to each purchase object for easy template access
     for purchase in milk:
         seller = purchase.seller
         if seller in seller_advance_info:
@@ -116,13 +108,10 @@ def addMilkProducts(request):
         form=mStockForm(request.POST)
         if form.is_valid():
             m=form.save(commit=False)
-            ## gives object bound to form
-            ## commit = False means it gives object that has not been saved in db yet
             mProduct_name=form.cleaned_data.get('mStock_product')
-            ##m.mStock_date=timezone.now()
             p=get_object_or_404(mProduct,mProduct_name=mProduct_name)
             qty=form.cleaned_data.get('mStock_qty')
-            p.mProduct_qty=p.mProduct_qty+qty  ##update stock
+            p.mProduct_qty=p.mProduct_qty+qty
 
             p.save()
             m.save()
@@ -144,7 +133,6 @@ def mStockDetailView(request,id):
     model=mStock
     m=get_object_or_404(mProduct,mProduct_id=id)
     stock_list=mStock.objects.filter(mStock_product=m.mProduct_id).order_by('-mStock_date')
-    ## Pagination
     page = request.GET.get('page', 1)
     paginator = Paginator(stock_list, 10)
 
@@ -162,23 +150,6 @@ def mStockDetailView(request,id):
 
     return render(request,'dairyapp/stock-details.html',context)
 
-# ## Delete stock logs
-# def mStockRecordDelete(request,id):
-#     mStock.objects.get(mStock_id=id).delete()
-#     # m = get_object_or_404(mProduct, mProduct_id=mid)
-#     # stock = mStock.objects.filter(mStock_id=id)
-#     # m.mProduct_qty=m.mProduct_qty-stock.mStock_qty
-#     # m.save()
-#
-#     # context = {
-#     #     'm': m,
-#     #     'stock': stock,
-#     # }
-#     # if not stock:
-#     return redirect('/addmilkproducts')
-
-    #return render(request, 'dairyapp/stock-details.html', context)
-
 @login_required
 def sellMilkProducts(request):
     title='Sell Milk Products'
@@ -187,18 +158,14 @@ def sellMilkProducts(request):
         form=mProductSellForm(request.POST)
         if form.is_valid():
             m=form.save(commit=False)
-            ## gives object bound to form
-            ## commit = False means it gives object that has not been saved in db yet
             milk_product = form.cleaned_data.get('milk_product')
-            ##m.mProductSell_date=timezone.now()
             p=get_object_or_404(mProduct,mProduct_name=milk_product)
             qty=form.cleaned_data.get('mProductSell_qty')
             rate=form.cleaned_data.get('mProductSell_rate')
             m.mProductSell_amount=qty*rate
 
-            ## update only if stock is available
             if (p.mProduct_qty>=qty):
-                p.mProduct_qty=p.mProduct_qty-qty  ##update stock
+                p.mProduct_qty=p.mProduct_qty-qty
                 m.mProductSell_qtyunit=p.mProduct_qtyunit
                 p.save()
                 m.save()
@@ -211,7 +178,6 @@ def sellMilkProducts(request):
     else:
         form=mProductSellForm()
 
-    ## Pagination
     page = request.GET.get('page', 1)
     paginator = Paginator(sales_list, 10)
 
@@ -236,10 +202,8 @@ def mProductSellDelete(request,id):
     sale=mProductSell.objects.get(mProductSell_id=id)
     p = get_object_or_404(mProduct, mProduct_name=sale.milk_product)
     p.mProduct_qty=p.mProduct_qty+sale.mProductSell_qty
-    p.save()  ##Update product stock while deleting sale record
+    p.save()
     sale.delete()
-    ##Deletes the sales instance from database
-
     return redirect('/sellmilkproducts')
 
 @login_required
@@ -251,9 +215,6 @@ def operationCost(request):
         form=operationCostForm(request.POST)
         if form.is_valid():
             m=form.save(commit=False)
-            ## gives object bound to form
-            ## commit = False means it gives object that has not been saved in db yet
-            #m.date=timezone.now()
             qty=form.cleaned_data.get('qty')
             rate=form.cleaned_data.get('rate')
             m.amount=qty*rate
@@ -264,7 +225,6 @@ def operationCost(request):
     else:
         form=operationCostForm()
 
-    ## Pagination
     page = request.GET.get('page', 1)
     paginator = Paginator(operations_list, 10)
 
@@ -368,6 +328,150 @@ def report(request):
     return render(request,'dairyapp/report.html',context)
 
 @login_required
+def monthlyReport(request):
+    title='Monthly Purchase Report'
+    
+    purchases = None
+    purchases_list = None
+    seller_name = None
+    month = None
+    year = None
+    report_date = None
+    totals = None
+    summary_rates = None
+    
+    seller_id = request.GET.get('seller')
+    date_str = request.GET.get('date')
+    
+    if request.method == 'POST':
+        form = MonthlyReportForm(request.POST)
+        if form.is_valid():
+            seller_name = form.cleaned_data.get('seller')
+            report_date = form.cleaned_data.get('report_date')
+    else:
+        form = MonthlyReportForm()
+        if seller_id and date_str:
+            try:
+                seller_obj = Seller.objects.get(seller_id=seller_id)
+                form.fields['seller'].initial = seller_obj
+                seller_name = seller_obj.seller_name
+                try:
+                    report_date = datetime.datetime.strptime(date_str, '%Y-%m-%d').date()
+                    form.fields['report_date'].initial = report_date
+                except ValueError:
+                    report_date = None
+            except (Seller.DoesNotExist, ValueError):
+                pass
+    
+    selected_seller = seller_name
+    if not selected_seller and seller_id:
+        try:
+            seller_obj = Seller.objects.get(seller_id=seller_id)
+            selected_seller = seller_obj.seller_name
+        except (Seller.DoesNotExist, ValueError):
+            pass
+    
+    if seller_name and report_date:
+        month = report_date.month
+        year = report_date.year
+        
+        last_day = calendar.monthrange(year, month)[1]
+        start_date = datetime.date(year, month, 1)
+        end_date = datetime.date(year, month, last_day)
+        
+        purchases_query = mPurchase.objects.filter(
+            seller=seller_name,
+            mPurchase_date__gte=start_date,
+            mPurchase_date__lte=end_date
+        ).order_by('-mPurchase_date', '-mPurchase_id')
+        
+        purchases_list = list(purchases_query[:100])
+        
+        seller_all_purchases = mPurchase.objects.filter(seller=seller_name).order_by('mPurchase_date', 'mPurchase_id')
+        seller_advance_info = {}
+        for purchase in seller_all_purchases:
+            if purchase.seller not in seller_advance_info:
+                seller_advance_info[purchase.seller] = {
+                    'total_advance': 0,
+                    'total_purchase': 0
+                }
+            seller_advance_info[purchase.seller]['total_advance'] += purchase.advance_amount or 0
+            seller_advance_info[purchase.seller]['total_purchase'] += purchase.mPurchase_total or 0
+        
+        for purchase in purchases_list:
+            total_advance = seller_advance_info.get(purchase.seller, {}).get('total_advance', 0)
+            total_purchase = seller_advance_info.get(purchase.seller, {}).get('total_purchase', 0)
+            purchase.remaining_balance = total_purchase - total_advance
+        
+        page = request.GET.get('page', 1)
+        paginator = Paginator(purchases_list, 20)
+        
+        try:
+            purchases = paginator.page(page)
+        except PageNotAnInteger:
+            purchases = paginator.page(1)
+        except EmptyPage:
+            purchases = paginator.page(paginator.num_pages)
+        
+        totals = {
+            'total_qty': sum([p.mPurchase_qty for p in purchases if p.mPurchase_qty]),
+            'total_ts_amount': sum([p.ts_amount for p in purchases if p.ts_amount]),
+            'total_amount': sum([p.mPurchase_total for p in purchases if p.mPurchase_total]),
+            'total_advance': sum([p.advance_amount for p in purchases if p.advance_amount]),
+        }
+        
+        if purchases_list:
+            first_purchase = purchases_list[0]
+            summary_rates = {
+                'fat_rate_per_kg': first_purchase.fat_rate_per_kg or 7.15,
+                'snf_rate_per_kg': first_purchase.snf_rate_per_kg or 4.55,
+                'total_solids_per_kg': first_purchase.total_solids_per_kg or 10.0,
+            }
+        else:
+            summary_rates = {
+                'fat_rate_per_kg': 7.15,
+                'snf_rate_per_kg': 4.55,
+                'total_solids_per_kg': 10.0,
+            }
+    
+    nepali_month_name = None
+    nepali_year = None
+    if month and year:
+        try:
+            from bikram import samwat
+            ad_date = datetime.date(year, month, 1)
+            bs_date = samwat.from_ad(ad_date)
+            nepali_year = bs_date.year
+            
+            nepali_months = {
+                1: 'बैशाख', 2: 'जेष्ठ', 3: 'आषाढ', 4: 'श्रावण', 5: 'भाद्र', 6: 'आश्विन',
+                7: 'कार्तिक', 8: 'मंसिर', 9: 'पौष', 10: 'माघ', 11: 'फाल्गुन', 12: 'चैत्र'
+            }
+            nepali_month_name = nepali_months.get(bs_date.month, '')
+        except Exception:
+            nepali_month_name = None
+            nepali_year = None
+    
+    context = {
+        'title': title,
+        'form': form,
+        'purchases': purchases,
+        'seller_name': seller_name or selected_seller,
+        'month': month,
+        'year': year,
+        'report_date': report_date,
+        'totals': totals,
+        'summary_rates': summary_rates,
+        'nepali_month_name': nepali_month_name,
+        'nepali_year': nepali_year,
+    }
+    
+    if month:
+        context['month_name'] = calendar.month_name[month]
+    
+    return render(request, 'dairyapp/monthly-report.html', context)
+
+@login_required
 def purchaseReport(request):
     title='Purchase Report'
     milk=mPurchase.objects.all().order_by('-mPurchase_id')[:10]
@@ -377,10 +481,8 @@ def purchaseReport(request):
 
         if form.is_valid():
             f=form.cleaned_data
-            ## now f is a dictionary
             dateFrom=f.get('fromdate')
             dateTo=f.get('todate')
-            ## filter by start and stop date
             milk=mPurchase.objects.filter(mPurchase_date__gte=dateFrom,
                                           mPurchase_date__lte=dateTo).order_by('-mPurchase_id')
 
@@ -408,10 +510,8 @@ def stockReport(request):
 
         if form.is_valid():
             f = form.cleaned_data
-            ## now f is a dictionary
             dateFrom = f.get('fromdate')
             dateTo = f.get('todate')
-            ## filter by start and stop date
             stock = mStock.objects.filter(mStock_date__gte=dateFrom,
                                             mStock_date__lte=dateTo).order_by('-mStock_date')
 
@@ -440,14 +540,11 @@ def salesReport(request):
 
         if form.is_valid():
             f = form.cleaned_data
-            ## now f is a dictionary
             dateFrom = f.get('fromdate')
             dateTo = f.get('todate')
-            ## filter by start and stop date
             sales = mProductSell.objects.filter(mProductSell_date__gte=dateFrom,
                                           mProductSell_date__lte=dateTo).order_by('-mProductSell_date')
 
-            ## if no records found
             if not sales:
                 messages.info(request, 'No Records Found')
 
@@ -473,10 +570,8 @@ def operationCostReport(request):
 
         if form.is_valid():
             f = form.cleaned_data
-            ## now f is a dictionary
             dateFrom = f.get('fromdate')
             dateTo = f.get('todate')
-            ## filter by start and stop date
             operations = operationCostModel.objects.filter(date__gte=dateFrom,
                                             date__lte=dateTo).order_by('-date')
 
@@ -509,7 +604,6 @@ def settings(request):
 
     return  render(request,'dairyapp/settings/index.html',context)
 
-## create/add new product name view
 class newProductCreateView(LoginRequiredMixin, PassRequestMixin, SuccessMessageMixin,
                      generic.CreateView):
     template_name = 'dairyapp/settings/add-product.html'
@@ -540,6 +634,55 @@ def newProductUnitCreate(request):
     return render(request,'dairyapp/settings/add-unit.html',context)
 
 @login_required
+def sellers(request):
+    title='Sellers Management (विक्रेता व्यवस्थापन)'
+    sellers_list = Seller.objects.all().order_by('seller_name')
+    
+    if request.method == 'POST':
+        form = SellerForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Seller added successfully.')
+            return redirect('/sellers/')
+    else:
+        form = SellerForm()
+    
+    context = {
+        'title': title,
+        'form': form,
+        'sellers': sellers_list,
+    }
+    return render(request, 'dairyapp/sellers.html', context)
+
+@login_required
+def sellerDelete(request, id):
+    seller = get_object_or_404(Seller, seller_id=id)
+    seller_name = seller.seller_name
+    seller.delete()
+    messages.success(request, f'Seller "{seller_name}" deleted successfully.')
+    return redirect('/sellers/')
+
+@login_required
+def sellerUpdate(request, id):
+    seller = get_object_or_404(Seller, seller_id=id)
+    
+    if request.method == 'POST':
+        form = SellerForm(request.POST, instance=seller)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Seller updated successfully.')
+            return redirect('/sellers/')
+    else:
+        form = SellerForm(instance=seller)
+    
+    context = {
+        'title': 'Update Seller',
+        'form': form,
+        'seller': seller,
+    }
+    return render(request, 'dairyapp/seller-update.html', context)
+
+@login_required
 def test(request):
     title='TEST'
 
@@ -547,9 +690,6 @@ def test(request):
         form=testForm(request.POST)
         if form.is_valid():
             m=form.save(commit=False)
-            ## gives object bound to form
-            ## commit = False means it gives object that has not been saved in db yet
-
             date=form.cleaned_data.get('data')
             m.save()
             return redirect('/test')

@@ -1,0 +1,225 @@
+{% extends 'dairyapp/base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block extra-css %}
+<style>
+    .update-seller-container {
+        padding: 20px;
+    }
+    
+    .form-card {
+        background: white;
+        border-radius: 8px;
+        padding: 25px;
+        margin-bottom: 25px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .card-header {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        padding: 15px 20px;
+        border-radius: 8px 8px 0 0;
+        margin: -25px -25px 20px -25px;
+    }
+    
+    .card-header h3 {
+        margin: 0;
+        font-weight: bold;
+    }
+    
+    .info-card {
+        background: #e8f4f8;
+        border-left: 4px solid #17a2b8;
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 4px;
+    }
+    
+    .info-card h4 {
+        margin-top: 0;
+        color: #17a2b8;
+    }
+    
+    .info-row {
+        margin: 8px 0;
+        display: flex;
+    }
+    
+    .info-label {
+        font-weight: bold;
+        min-width: 150px;
+    }
+</style>
+{% endblock %}
+
+{% block main-content %}
+<div class="update-seller-container">
+    <div class="row">
+        <div class="col-lg-10 col-lg-offset-1">
+            <div class="form-card">
+                <div class="card-header">
+                    <h3><i class="fa fa-edit"></i> Update Seller</h3>
+                </div>
+                
+                {% if seller %}
+                <div class="info-card">
+                    <h4><i class="fa fa-info-circle"></i> Current Seller Information</h4>
+                    <div class="info-row">
+                        <span class="info-label">Seller Name:</span>
+                        <span>{{ seller.seller_name }}</span>
+                    </div>
+                    {% if seller.seller_address %}
+                    <div class="info-row">
+                        <span class="info-label">Address:</span>
+                        <span>{{ seller.seller_address }}</span>
+                    </div>
+                    {% endif %}
+                    {% if seller.seller_contact %}
+                    <div class="info-row">
+                        <span class="info-label">Contact:</span>
+                        <span>{{ seller.seller_contact }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="info-row">
+                        <span class="info-label">Created Date:</span>
+                        <span>{{ seller.created_date|date:"Y-m-d" }}</span>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    {{ form.non_field_errors }}
+                    
+                    {% for hidden_field in form.hidden_fields %}
+                        {{ hidden_field }}
+                    {% endfor %}
+                    
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger" role="alert">
+                            {% for error in form.non_field_errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>{{ form.seller_name.label }}</label>
+                                {% render_field form.seller_name class="form-control" %}
+                                {% if form.seller_name.errors %}
+                                    <div class="text-danger">{{ form.seller_name.errors }}</div>
+                                {% endif %}
+                                {% if form.seller_name.help_text %}
+                                    <small class="form-text text-muted">{{ form.seller_name.help_text }}</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>{{ form.seller_contact.label }}</label>
+                                {% render_field form.seller_contact class="form-control" %}
+                                {% if form.seller_contact.errors %}
+                                    <div class="text-danger">{{ form.seller_contact.errors }}</div>
+                                {% endif %}
+                                {% if form.seller_contact.help_text %}
+                                    <small class="form-text text-muted">{{ form.seller_contact.help_text }}</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>{{ form.seller_address.label }}</label>
+                                {% render_field form.seller_address class="form-control" %}
+                                {% if form.seller_address.errors %}
+                                    <div class="text-danger">{{ form.seller_address.errors }}</div>
+                                {% endif %}
+                                {% if form.seller_address.help_text %}
+                                    <small class="form-text text-muted">{{ form.seller_address.help_text }}</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>{{ form.default_fat_rate_per_kg.label }}</label>
+                                {% render_field form.default_fat_rate_per_kg class="form-control" %}
+                                {% if form.default_fat_rate_per_kg.errors %}
+                                    <div class="text-danger">{{ form.default_fat_rate_per_kg.errors }}</div>
+                                {% endif %}
+                                {% if form.default_fat_rate_per_kg.help_text %}
+                                    <small class="form-text text-muted">{{ form.default_fat_rate_per_kg.help_text }}</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>{{ form.default_snf_rate_per_kg.label }}</label>
+                                {% render_field form.default_snf_rate_per_kg class="form-control" %}
+                                {% if form.default_snf_rate_per_kg.errors %}
+                                    <div class="text-danger">{{ form.default_snf_rate_per_kg.errors }}</div>
+                                {% endif %}
+                                {% if form.default_snf_rate_per_kg.help_text %}
+                                    <small class="form-text text-muted">{{ form.default_snf_rate_per_kg.help_text }}</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>{{ form.default_total_solids_per_kg.label }}</label>
+                                {% render_field form.default_total_solids_per_kg class="form-control" %}
+                                {% if form.default_total_solids_per_kg.errors %}
+                                    <div class="text-danger">{{ form.default_total_solids_per_kg.errors }}</div>
+                                {% endif %}
+                                {% if form.default_total_solids_per_kg.help_text %}
+                                    <small class="form-text text-muted">{{ form.default_total_solids_per_kg.help_text }}</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>{{ form.remarks.label }}</label>
+                                {% render_field form.remarks class="form-control" %}
+                                {% if form.remarks.errors %}
+                                    <div class="text-danger">{{ form.remarks.errors }}</div>
+                                {% endif %}
+                                {% if form.remarks.help_text %}
+                                    <small class="form-text text-muted">{{ form.remarks.help_text }}</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="fa fa-save"></i> Update Seller
+                        </button>
+                        <a href="{% url 'dairyapp:sellers' %}" class="btn btn-default btn-lg">
+                            <i class="fa fa-times"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra-js %}
+{% endblock %}
+

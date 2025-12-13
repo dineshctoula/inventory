@@ -1,5 +1,5 @@
 from django import forms
-from .models import mProduct,mProductUnit,mPurchase, mStock, mProductSell, operationCost,test,Due
+from .models import mProduct,mProductUnit,mPurchase, mStock, mProductSell, operationCost,test,Due,Seller
 from dairyapp.choices import MILK_CHOICES
 import datetime
 from bootstrap_modal_forms.mixins import PopRequestMixin, CreateUpdateAjaxMixin
@@ -10,11 +10,20 @@ class mPurchaseForm(forms.ModelForm):
         This form is for milk purchase
     """
 
-    seller=forms.CharField(
-       label='Seller Name',
-        max_length=50,
-        help_text="Please Enter Seller Name",
+    seller=forms.ModelChoiceField(
+        label='Seller Name',
+        queryset=Seller.objects.all().order_by('seller_name'),
+        required=True,
+        help_text="Select seller from list",
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        empty_label="-- Select Seller --"
     )
+    
+    def clean_seller(self):
+        seller = self.cleaned_data.get('seller')
+        if seller:
+            return seller.seller_name  # Return name string for backward compatibility
+        return seller
 
     mPurchase_date=forms.DateField(
         label='Date',
@@ -91,6 +100,13 @@ class mPurchaseForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(mPurchaseForm, self).__init__(*args, **kwargs)
         self.fields['mPurchase_date'].widget.attrs['id'] = 'nepalicalendar'
+        # Set initial seller if it matches an existing seller name
+        if self.instance and self.instance.pk and self.instance.seller:
+            try:
+                seller_obj = Seller.objects.get(seller_name=self.instance.seller)
+                self.fields['seller'].initial = seller_obj
+            except Seller.DoesNotExist:
+                pass
 
     class Meta:
         model=mPurchase
@@ -410,6 +426,96 @@ class testForm(forms.ModelForm):
     class Meta:
         model=test
         fields=('name','date',)
+
+
+class MonthlyReportForm(forms.Form):
+    seller = forms.ModelChoiceField(
+        label='Seller Name',
+        queryset=Seller.objects.all().order_by('seller_name'),
+        required=True,
+        help_text="Select seller from list",
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        empty_label="-- Select Seller --"
+    )
+    
+    def clean_seller(self):
+        seller = self.cleaned_data.get('seller')
+        if seller:
+            return seller.seller_name  # Return name string for backward compatibility
+        return seller
+    
+    report_date = forms.DateField(
+        label='Select Date (Any date in the month)',
+        required=True,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'nepalicalendar_monthly'}),
+        help_text="Select any date within the month you want to generate report for"
+    )
+    
+    def __init__(self, *args, **kwargs):
+        super(MonthlyReportForm, self).__init__(*args, **kwargs)
+
+
+class SellerForm(forms.ModelForm):
+    seller_name = forms.CharField(
+        label='Seller Name',
+        max_length=50,
+        required=True,
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        help_text="Enter seller name (must be unique)"
+    )
+    
+    seller_address = forms.CharField(
+        label='Address',
+        max_length=200,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        help_text="Seller address (optional)"
+    )
+    
+    seller_contact = forms.CharField(
+        label='Contact',
+        max_length=20,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        help_text="Contact number (optional)"
+    )
+    
+    default_fat_rate_per_kg = forms.FloatField(
+        label='Default Fat Rate/kg',
+        required=False,
+        initial=7.15,
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0'}),
+        help_text="Default fat rate per kg (optional)"
+    )
+    
+    default_snf_rate_per_kg = forms.FloatField(
+        label='Default SNF Rate/Kgs',
+        required=False,
+        initial=4.55,
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0'}),
+        help_text="Default SNF rate per kg (optional)"
+    )
+    
+    default_total_solids_per_kg = forms.FloatField(
+        label='Default Total Solids/Kgs (%)',
+        required=False,
+        initial=10.0,
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0'}),
+        help_text="Default total solids per kg percentage (optional)"
+    )
+    
+    remarks = forms.CharField(
+        label='Remarks',
+        required=False,
+        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        help_text="Additional notes about the seller (optional)"
+    )
+    
+    class Meta:
+        model = Seller
+        fields = ('seller_name', 'seller_address', 'seller_contact', 
+                  'default_fat_rate_per_kg', 'default_snf_rate_per_kg', 
+                  'default_total_solids_per_kg', 'remarks')
 
 
 class DueForm(forms.ModelForm):
