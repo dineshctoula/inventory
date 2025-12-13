@@ -4,3 +4,4 @@ django-widget-tweaks==1.4.3
 django-filter
 bootstrap_modal_forms
 python manage.py create_owner your@email.com yourpassword
+python manage.py create_owner owner@example.com mypassword123
