@@ -360,7 +360,7 @@
                             <td>-</td>
                             <td><strong>{{ totals.total_amount|floatformat:2 }}</strong></td>
                             <td><strong>{{ totals.total_advance|floatformat:2 }}</strong></td>
-                            <td>-</td>
+                            <td><strong>{{ totals.total_remaining|floatformat:2 }}</strong></td>
                             <td></td>
                         </tr>
                         {% endif %}
@@ -454,7 +454,7 @@
                             <td>-</td>
                             <td><strong>{{ totals.total_amount|floatformat:2 }}</strong></td>
                             <td><strong>{{ totals.total_advance|floatformat:2 }}</strong></td>
-                            <td>-</td>
+                            <td><strong>{{ totals.total_remaining|floatformat:2 }}</strong></td>
                             <td></td>
                         </tr>
                         {% endif %}
@@ -530,17 +530,19 @@
         <thead>
             <tr>
                 <th style="width: 3%;">SN.</th>
-                <th style="width: 8%;">Date</th>
-                <th style="width: 8%;">Qty L.</th>
-                <th style="width: 5%;">Fat</th>
-                <th style="width: 5%;">SNF</th>
-                <th style="width: 7%;">Fat/Kg.</th>
-                <th style="width: 7%;">SNF/Kg.</th>
-                <th style="width: 7%;">Rate</th>
-                <th style="width: 6%;">TS</th>
-                <th style="width: 9%;">Ts Amount</th>
-                <th style="width: 8%;">Rate/ltr</th>
-                <th style="width: 11%;">Total Amount</th>
+                <th style="width: 7%;">Date</th>
+                <th style="width: 7%;">Qty L.</th>
+                <th style="width: 4%;">Fat</th>
+                <th style="width: 4%;">SNF</th>
+                <th style="width: 6%;">Fat/Kg.</th>
+                <th style="width: 6%;">SNF/Kg.</th>
+                <th style="width: 6%;">Rate</th>
+                <th style="width: 5%;">TS</th>
+                <th style="width: 8%;">Ts Amount</th>
+                <th style="width: 7%;">Rate/ltr</th>
+                <th style="width: 9%;">Total Amount</th>
+                <th style="width: 8%;">Advance</th>
+                <th style="width: 9%;">Remaining</th>
             </tr>
         </thead>
         <tbody>
@@ -558,6 +560,8 @@
                 <td>{% if purchase.ts_amount %}{{ purchase.ts_amount|floatformat:2 }}{% else %}-{% endif %}</td>
                 <td>{% if purchase.rate_per_ltr %}{{ purchase.rate_per_ltr|floatformat:3 }}{% else %}-{% endif %}</td>
                 <td>{{ purchase.mPurchase_total|floatformat:2 }}</td>
+                <td>{% if purchase.advance_amount %}{{ purchase.advance_amount|floatformat:2 }}{% else %}0.00{% endif %}</td>
+                <td>{{ purchase.remaining_balance|floatformat:2 }}</td>
             </tr>
             {% endfor %}
             
@@ -573,6 +577,8 @@
                 <td><strong>{{ totals.total_ts_amount|floatformat:2 }}</strong></td>
                 <td>-</td>
                 <td><strong>{{ totals.total_amount|floatformat:2 }}</strong></td>
+                <td><strong>{{ totals.total_advance|floatformat:2 }}</strong></td>
+                <td><strong>{{ totals.total_remaining|floatformat:2 }}</strong></td>
             </tr>
             {% endif %}
         </tbody>
@@ -617,18 +623,20 @@
         <thead>
             <tr>
                 <th style="width: 3%;">SN.</th>
-                <th style="width: 8%;">Date</th>
-                <th style="width: 10%;">Product</th>
-                <th style="width: 8%;">Qty L.</th>
-                <th style="width: 5%;">Fat</th>
-                <th style="width: 5%;">SNF</th>
-                <th style="width: 7%;">Fat/Kg.</th>
-                <th style="width: 7%;">SNF/Kg.</th>
-                <th style="width: 7%;">Rate</th>
-                <th style="width: 6%;">TS</th>
-                <th style="width: 9%;">Ts Amount</th>
-                <th style="width: 8%;">Rate/ltr</th>
-                <th style="width: 11%;">Total Amount</th>
+                <th style="width: 7%;">Date</th>
+                <th style="width: 8%;">Product</th>
+                <th style="width: 7%;">Qty L.</th>
+                <th style="width: 4%;">Fat</th>
+                <th style="width: 4%;">SNF</th>
+                <th style="width: 6%;">Fat/Kg.</th>
+                <th style="width: 6%;">SNF/Kg.</th>
+                <th style="width: 6%;">Rate</th>
+                <th style="width: 5%;">TS</th>
+                <th style="width: 8%;">Ts Amount</th>
+                <th style="width: 7%;">Rate/ltr</th>
+                <th style="width: 9%;">Total Amount</th>
+                <th style="width: 8%;">Advance</th>
+                <th style="width: 9%;">Remaining</th>
             </tr>
         </thead>
         <tbody>
@@ -647,6 +655,8 @@
                 <td>{% if sale.ts_amount %}{{ sale.ts_amount|floatformat:2 }}{% else %}-{% endif %}</td>
                 <td>{% if sale.rate_per_ltr %}{{ sale.rate_per_ltr|floatformat:3 }}{% else %}-{% endif %}</td>
                 <td>{{ sale.mProductSell_amount|floatformat:2 }}</td>
+                <td>{% if sale.advance_amount %}{{ sale.advance_amount|floatformat:2 }}{% else %}0.00{% endif %}</td>
+                <td>{{ sale.remaining_balance|floatformat:2 }}</td>
             </tr>
             {% endfor %}
             
@@ -662,6 +672,8 @@
                 <td><strong>{{ totals.total_ts_amount|floatformat:2 }}</strong></td>
                 <td>-</td>
                 <td><strong>{{ totals.total_amount|floatformat:2 }}</strong></td>
+                <td><strong>{{ totals.total_advance|floatformat:2 }}</strong></td>
+                <td><strong>{{ totals.total_remaining|floatformat:2 }}</strong></td>
             </tr>
             {% endif %}
         </tbody>

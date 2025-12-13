@@ -30,14 +30,6 @@ class mPurchaseForm(forms.ModelForm):
         #input_formats=['%Y-%m-%d'],
     )
 
-    mPurchase_product=forms.ChoiceField(
-        choices=MILK_CHOICES,
-        label='Milk Type',
-        initial='',
-        widget=forms.Select(),
-        help_text="Choose milk type from options",
-        required=True
-    )
 
     mPurchase_qty=forms.FloatField(
         label='Qty (Liters)',
@@ -110,7 +102,7 @@ class mPurchaseForm(forms.ModelForm):
 
     class Meta:
         model=mPurchase
-        fields=('seller','mPurchase_date','mPurchase_product','mPurchase_qty',
+        fields=('seller','mPurchase_date','mPurchase_qty',
                 'fat_rate_per_kg','snf_rate_per_kg','total_solids_per_kg',
                 'fat','snf','ts','advance_amount',)
 
@@ -158,6 +150,11 @@ class mPurchaseForm(forms.ModelForm):
             self._errors['advance_amount'] = self.error_class(["Advance amount cannot be negative"])
         if advance_amount is None:
             self.cleaned_data['advance_amount'] = 0
+
+        # Set default milk type if not provided
+        if 'mPurchase_product' not in self.cleaned_data:
+            from dairyapp.choices import Cow
+            self.cleaned_data['mPurchase_product'] = Cow
 
         return self.cleaned_data
 

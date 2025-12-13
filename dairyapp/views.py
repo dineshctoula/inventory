@@ -452,21 +452,11 @@ def monthlyReport(request):
             
             purchases_list = list(purchases_query[:100])
             
-            seller_all_purchases = mPurchase.objects.filter(seller=seller_name).order_by('mPurchase_date', 'mPurchase_id')
-            seller_advance_info = {}
-            for purchase in seller_all_purchases:
-                if purchase.seller not in seller_advance_info:
-                    seller_advance_info[purchase.seller] = {
-                        'total_advance': 0,
-                        'total_purchase': 0
-                    }
-                seller_advance_info[purchase.seller]['total_advance'] += purchase.advance_amount or 0
-                seller_advance_info[purchase.seller]['total_purchase'] += purchase.mPurchase_total or 0
-            
+            # Calculate remaining balance for each purchase item (transaction amount - advance for that transaction)
             for purchase in purchases_list:
-                total_advance = seller_advance_info.get(purchase.seller, {}).get('total_advance', 0)
-                total_purchase = seller_advance_info.get(purchase.seller, {}).get('total_purchase', 0)
-                purchase.remaining_balance = total_purchase - total_advance
+                purchase_total = purchase.mPurchase_total or 0
+                advance = purchase.advance_amount or 0
+                purchase.remaining_balance = purchase_total - advance
             
             page = request.GET.get('page', 1)
             paginator = Paginator(purchases_list, 20)
@@ -483,6 +473,7 @@ def monthlyReport(request):
                 'total_ts_amount': sum([p.ts_amount for p in purchases if p.ts_amount]),
                 'total_amount': sum([p.mPurchase_total for p in purchases if p.mPurchase_total]),
                 'total_advance': sum([p.advance_amount for p in purchases if p.advance_amount]),
+                'total_remaining': sum([p.remaining_balance for p in purchases if hasattr(p, 'remaining_balance')]),
             }
             
             if purchases_list:
@@ -508,21 +499,11 @@ def monthlyReport(request):
             
             sales_list = list(sales_query[:100])
             
-            buyer_all_sales = mProductSell.objects.filter(buyer_name=buyer_name).order_by('mProductSell_date', 'mProductSell_id')
-            buyer_advance_info = {}
-            for sale in buyer_all_sales:
-                if sale.buyer_name not in buyer_advance_info:
-                    buyer_advance_info[sale.buyer_name] = {
-                        'total_advance': 0,
-                        'total_sale': 0
-                    }
-                buyer_advance_info[sale.buyer_name]['total_advance'] += sale.advance_amount or 0
-                buyer_advance_info[sale.buyer_name]['total_sale'] += sale.mProductSell_amount or 0
-            
+            # Calculate remaining balance for each sale item (transaction amount - advance for that transaction)
             for sale in sales_list:
-                total_advance = buyer_advance_info.get(sale.buyer_name, {}).get('total_advance', 0)
-                total_sale = buyer_advance_info.get(sale.buyer_name, {}).get('total_sale', 0)
-                sale.remaining_balance = total_sale - total_advance
+                sale_amount = sale.mProductSell_amount or 0
+                advance = sale.advance_amount or 0
+                sale.remaining_balance = sale_amount - advance
             
             page = request.GET.get('page', 1)
             paginator = Paginator(sales_list, 20)
@@ -539,6 +520,7 @@ def monthlyReport(request):
                 'total_ts_amount': sum([s.ts_amount for s in sales if s.ts_amount]),
                 'total_amount': sum([s.mProductSell_amount for s in sales if s.mProductSell_amount]),
                 'total_advance': sum([s.advance_amount for s in sales if s.advance_amount]),
+                'total_remaining': sum([s.remaining_balance for s in sales if hasattr(s, 'remaining_balance')]),
             }
             
             if sales_list:
