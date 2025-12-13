@@ -1,5 +1,5 @@
-from .forms import mPurchaseForm,mStockForm,mProductSellForm, operationCostForm,testForm,dateForm, addProductForm,addProductUnitForm,DueForm,MonthlyReportForm,SellerForm
-from .models import mPurchase,mProduct,mStock, mProductSell, mProduct, mProductUnit,test,Due,Seller
+from .forms import mPurchaseForm,mStockForm,mProductSellForm, operationCostForm,testForm,dateForm, addProductForm,addProductUnitForm,DueForm,MonthlyReportForm,SellerForm,BuyerForm
+from .models import mPurchase,mProduct,mStock, mProductSell, mProduct, mProductUnit,test,Due,Seller,Buyer
 from .models import operationCost as operationCostModel
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
@@ -153,7 +153,8 @@ def mStockDetailView(request,id):
 @login_required
 def sellMilkProducts(request):
     title='Sell Milk Products'
-    sales_list=mProductSell.objects.all().order_by('-mProductSell_date')
+    sales_list=mProductSell.objects.all().order_by('-mProductSell_id')
+
     if request.method=='POST':
         form=mProductSellForm(request.POST)
         if form.is_valid():
@@ -161,20 +162,16 @@ def sellMilkProducts(request):
             milk_product = form.cleaned_data.get('milk_product')
             p=get_object_or_404(mProduct,mProduct_name=milk_product)
             qty=form.cleaned_data.get('mProductSell_qty')
-            rate=form.cleaned_data.get('mProductSell_rate')
-            m.mProductSell_amount=qty*rate
 
             if (p.mProduct_qty>=qty):
                 p.mProduct_qty=p.mProduct_qty-qty
                 m.mProductSell_qtyunit=p.mProduct_qtyunit
                 p.save()
                 m.save()
-                messages.info(request, 'Product Successfully sold')
+                messages.success(request, 'Product Successfully sold')
                 return redirect('/sellmilkproducts')
             else:
                 messages.warning(request,'Product Quantity not available in stock')
-
-
     else:
         form=mProductSellForm()
 
@@ -188,10 +185,45 @@ def sellMilkProducts(request):
     except EmptyPage:
         sales = paginator.page(paginator.num_pages)
 
+    totals = {
+        'total_qty': sum([s.mProductSell_qty for s in sales if s.mProductSell_qty]),
+        'total_ts_amount': sum([s.ts_amount for s in sales if s.ts_amount]),
+        'total_amount': sum([s.mProductSell_amount for s in sales if s.mProductSell_amount]),
+        'total_advance': sum([s.advance_amount for s in sales if s.advance_amount]),
+    }
+    
+    buyer_advance_info = {}
+    all_sales = mProductSell.objects.all()
+    for sale in all_sales:
+        buyer = sale.buyer_name
+        if buyer not in buyer_advance_info:
+            buyer_advance_info[buyer] = {
+                'total_advance': 0,
+                'total_sale': 0,
+                'remaining_balance': 0,
+            }
+        buyer_advance_info[buyer]['total_advance'] += sale.advance_amount or 0
+        buyer_advance_info[buyer]['total_sale'] += sale.mProductSell_amount or 0
+    
+    for buyer in buyer_advance_info:
+        buyer_advance_info[buyer]['remaining_balance'] = (
+            buyer_advance_info[buyer]['total_sale'] - 
+            buyer_advance_info[buyer]['total_advance']
+        )
+    
+    for sale in sales:
+        buyer = sale.buyer_name
+        if buyer in buyer_advance_info:
+            sale.remaining_balance = buyer_advance_info[buyer]['remaining_balance']
+        else:
+            sale.remaining_balance = 0
+
     context={
         'title':title,
         'form':form,
         'sales':sales,
+        'totals': totals,
+        'buyer_advance_info': buyer_advance_info,
     }
     return render(request,'dairyapp/sell-milk-products.html',context)
 
@@ -329,11 +361,15 @@ def report(request):
 
 @login_required
 def monthlyReport(request):
-    title='Monthly Purchase Report'
+    title='Monthly Report'
     
     purchases = None
+    sales = None
     purchases_list = None
+    sales_list = None
     seller_name = None
+    buyer_name = None
+    report_type = 'purchase'
     month = None
     year = None
     report_date = None
@@ -341,20 +377,26 @@ def monthlyReport(request):
     summary_rates = None
     
     seller_id = request.GET.get('seller')
+    buyer_id = request.GET.get('buyer')
     date_str = request.GET.get('date')
+    report_type_param = request.GET.get('type', 'purchase')
     
     if request.method == 'POST':
         form = MonthlyReportForm(request.POST)
         if form.is_valid():
+            report_type = form.cleaned_data.get('report_type')
             seller_name = form.cleaned_data.get('seller')
+            buyer_name = form.cleaned_data.get('buyer')
             report_date = form.cleaned_data.get('report_date')
     else:
-        form = MonthlyReportForm()
+        form = MonthlyReportForm(initial={'report_type': report_type_param})
         if seller_id and date_str:
             try:
                 seller_obj = Seller.objects.get(seller_id=seller_id)
                 form.fields['seller'].initial = seller_obj
+                form.fields['report_type'].initial = 'purchase'
                 seller_name = seller_obj.seller_name
+                report_type = 'purchase'
                 try:
                     report_date = datetime.datetime.strptime(date_str, '%Y-%m-%d').date()
                     form.fields['report_date'].initial = report_date
@@ -362,8 +404,23 @@ def monthlyReport(request):
                     report_date = None
             except (Seller.DoesNotExist, ValueError):
                 pass
+        elif buyer_id and date_str:
+            try:
+                buyer_obj = Buyer.objects.get(buyer_id=buyer_id)
+                form.fields['buyer'].initial = buyer_obj
+                form.fields['report_type'].initial = 'sales'
+                buyer_name = buyer_obj.buyer_name
+                report_type = 'sales'
+                try:
+                    report_date = datetime.datetime.strptime(date_str, '%Y-%m-%d').date()
+                    form.fields['report_date'].initial = report_date
+                except ValueError:
+                    report_date = None
+            except (Buyer.DoesNotExist, ValueError):
+                pass
     
     selected_seller = seller_name
+    selected_buyer = buyer_name
     if not selected_seller and seller_id:
         try:
             seller_obj = Seller.objects.get(seller_id=seller_id)
@@ -371,7 +428,14 @@ def monthlyReport(request):
         except (Seller.DoesNotExist, ValueError):
             pass
     
-    if seller_name and report_date:
+    if not selected_buyer and buyer_id:
+        try:
+            buyer_obj = Buyer.objects.get(buyer_id=buyer_id)
+            selected_buyer = buyer_obj.buyer_name
+        except (Buyer.DoesNotExist, ValueError):
+            pass
+    
+    if report_date:
         month = report_date.month
         year = report_date.year
         
@@ -379,60 +443,117 @@ def monthlyReport(request):
         start_date = datetime.date(year, month, 1)
         end_date = datetime.date(year, month, last_day)
         
-        purchases_query = mPurchase.objects.filter(
-            seller=seller_name,
-            mPurchase_date__gte=start_date,
-            mPurchase_date__lte=end_date
-        ).order_by('-mPurchase_date', '-mPurchase_id')
-        
-        purchases_list = list(purchases_query[:100])
-        
-        seller_all_purchases = mPurchase.objects.filter(seller=seller_name).order_by('mPurchase_date', 'mPurchase_id')
-        seller_advance_info = {}
-        for purchase in seller_all_purchases:
-            if purchase.seller not in seller_advance_info:
-                seller_advance_info[purchase.seller] = {
-                    'total_advance': 0,
-                    'total_purchase': 0
+        if report_type == 'purchase' and seller_name:
+            purchases_query = mPurchase.objects.filter(
+                seller=seller_name,
+                mPurchase_date__gte=start_date,
+                mPurchase_date__lte=end_date
+            ).order_by('-mPurchase_date', '-mPurchase_id')
+            
+            purchases_list = list(purchases_query[:100])
+            
+            seller_all_purchases = mPurchase.objects.filter(seller=seller_name).order_by('mPurchase_date', 'mPurchase_id')
+            seller_advance_info = {}
+            for purchase in seller_all_purchases:
+                if purchase.seller not in seller_advance_info:
+                    seller_advance_info[purchase.seller] = {
+                        'total_advance': 0,
+                        'total_purchase': 0
+                    }
+                seller_advance_info[purchase.seller]['total_advance'] += purchase.advance_amount or 0
+                seller_advance_info[purchase.seller]['total_purchase'] += purchase.mPurchase_total or 0
+            
+            for purchase in purchases_list:
+                total_advance = seller_advance_info.get(purchase.seller, {}).get('total_advance', 0)
+                total_purchase = seller_advance_info.get(purchase.seller, {}).get('total_purchase', 0)
+                purchase.remaining_balance = total_purchase - total_advance
+            
+            page = request.GET.get('page', 1)
+            paginator = Paginator(purchases_list, 20)
+            
+            try:
+                purchases = paginator.page(page)
+            except PageNotAnInteger:
+                purchases = paginator.page(1)
+            except EmptyPage:
+                purchases = paginator.page(paginator.num_pages)
+            
+            totals = {
+                'total_qty': sum([p.mPurchase_qty for p in purchases if p.mPurchase_qty]),
+                'total_ts_amount': sum([p.ts_amount for p in purchases if p.ts_amount]),
+                'total_amount': sum([p.mPurchase_total for p in purchases if p.mPurchase_total]),
+                'total_advance': sum([p.advance_amount for p in purchases if p.advance_amount]),
+            }
+            
+            if purchases_list:
+                first_purchase = purchases_list[0]
+                summary_rates = {
+                    'fat_rate_per_kg': first_purchase.fat_rate_per_kg or 7.15,
+                    'snf_rate_per_kg': first_purchase.snf_rate_per_kg or 4.55,
+                    'total_solids_per_kg': first_purchase.total_solids_per_kg or 10.0,
                 }
-            seller_advance_info[purchase.seller]['total_advance'] += purchase.advance_amount or 0
-            seller_advance_info[purchase.seller]['total_purchase'] += purchase.mPurchase_total or 0
+            else:
+                summary_rates = {
+                    'fat_rate_per_kg': 7.15,
+                    'snf_rate_per_kg': 4.55,
+                    'total_solids_per_kg': 10.0,
+                }
         
-        for purchase in purchases_list:
-            total_advance = seller_advance_info.get(purchase.seller, {}).get('total_advance', 0)
-            total_purchase = seller_advance_info.get(purchase.seller, {}).get('total_purchase', 0)
-            purchase.remaining_balance = total_purchase - total_advance
-        
-        page = request.GET.get('page', 1)
-        paginator = Paginator(purchases_list, 20)
-        
-        try:
-            purchases = paginator.page(page)
-        except PageNotAnInteger:
-            purchases = paginator.page(1)
-        except EmptyPage:
-            purchases = paginator.page(paginator.num_pages)
-        
-        totals = {
-            'total_qty': sum([p.mPurchase_qty for p in purchases if p.mPurchase_qty]),
-            'total_ts_amount': sum([p.ts_amount for p in purchases if p.ts_amount]),
-            'total_amount': sum([p.mPurchase_total for p in purchases if p.mPurchase_total]),
-            'total_advance': sum([p.advance_amount for p in purchases if p.advance_amount]),
-        }
-        
-        if purchases_list:
-            first_purchase = purchases_list[0]
-            summary_rates = {
-                'fat_rate_per_kg': first_purchase.fat_rate_per_kg or 7.15,
-                'snf_rate_per_kg': first_purchase.snf_rate_per_kg or 4.55,
-                'total_solids_per_kg': first_purchase.total_solids_per_kg or 10.0,
+        elif report_type == 'sales' and buyer_name:
+            sales_query = mProductSell.objects.filter(
+                buyer_name=buyer_name,
+                mProductSell_date__gte=start_date,
+                mProductSell_date__lte=end_date
+            ).order_by('-mProductSell_date', '-mProductSell_id')
+            
+            sales_list = list(sales_query[:100])
+            
+            buyer_all_sales = mProductSell.objects.filter(buyer_name=buyer_name).order_by('mProductSell_date', 'mProductSell_id')
+            buyer_advance_info = {}
+            for sale in buyer_all_sales:
+                if sale.buyer_name not in buyer_advance_info:
+                    buyer_advance_info[sale.buyer_name] = {
+                        'total_advance': 0,
+                        'total_sale': 0
+                    }
+                buyer_advance_info[sale.buyer_name]['total_advance'] += sale.advance_amount or 0
+                buyer_advance_info[sale.buyer_name]['total_sale'] += sale.mProductSell_amount or 0
+            
+            for sale in sales_list:
+                total_advance = buyer_advance_info.get(sale.buyer_name, {}).get('total_advance', 0)
+                total_sale = buyer_advance_info.get(sale.buyer_name, {}).get('total_sale', 0)
+                sale.remaining_balance = total_sale - total_advance
+            
+            page = request.GET.get('page', 1)
+            paginator = Paginator(sales_list, 20)
+            
+            try:
+                sales = paginator.page(page)
+            except PageNotAnInteger:
+                sales = paginator.page(1)
+            except EmptyPage:
+                sales = paginator.page(paginator.num_pages)
+            
+            totals = {
+                'total_qty': sum([s.mProductSell_qty for s in sales if s.mProductSell_qty]),
+                'total_ts_amount': sum([s.ts_amount for s in sales if s.ts_amount]),
+                'total_amount': sum([s.mProductSell_amount for s in sales if s.mProductSell_amount]),
+                'total_advance': sum([s.advance_amount for s in sales if s.advance_amount]),
             }
-        else:
-            summary_rates = {
-                'fat_rate_per_kg': 7.15,
-                'snf_rate_per_kg': 4.55,
-                'total_solids_per_kg': 10.0,
-            }
+            
+            if sales_list:
+                first_sale = sales_list[0]
+                summary_rates = {
+                    'fat_rate_per_kg': first_sale.fat_rate_per_kg or 7.15,
+                    'snf_rate_per_kg': first_sale.snf_rate_per_kg or 4.55,
+                    'total_solids_per_kg': first_sale.total_solids_per_kg or 10.0,
+                }
+            else:
+                summary_rates = {
+                    'fat_rate_per_kg': 7.15,
+                    'snf_rate_per_kg': 4.55,
+                    'total_solids_per_kg': 10.0,
+                }
     
     nepali_month_name = None
     nepali_year = None
@@ -456,7 +577,10 @@ def monthlyReport(request):
         'title': title,
         'form': form,
         'purchases': purchases,
+        'sales': sales,
+        'report_type': report_type,
         'seller_name': seller_name or selected_seller,
+        'buyer_name': buyer_name or selected_buyer,
         'month': month,
         'year': year,
         'report_date': report_date,
@@ -635,22 +759,36 @@ def newProductUnitCreate(request):
 
 @login_required
 def sellers(request):
-    title='Sellers Management (विक्रेता व्यवस्थापन)'
+    title='Buyers & Sellers Management (क्रेता र विक्रेता व्यवस्थापन)'
     sellers_list = Seller.objects.all().order_by('seller_name')
+    buyers_list = Buyer.objects.all().order_by('buyer_name')
     
-    if request.method == 'POST':
+    # Handle seller form submission
+    if request.method == 'POST' and 'seller_form' in request.POST:
         form = SellerForm(request.POST)
+        buyer_form = BuyerForm()
         if form.is_valid():
             form.save()
             messages.success(request, 'Seller added successfully.')
             return redirect('/sellers/')
+    # Handle buyer form submission
+    elif request.method == 'POST' and 'buyer_form' in request.POST:
+        buyer_form = BuyerForm(request.POST)
+        form = SellerForm()
+        if buyer_form.is_valid():
+            buyer_form.save()
+            messages.success(request, 'Buyer added successfully.')
+            return redirect('/sellers/')
     else:
         form = SellerForm()
+        buyer_form = BuyerForm()
     
     context = {
         'title': title,
         'form': form,
+        'buyer_form': buyer_form,
         'sellers': sellers_list,
+        'buyers': buyers_list,
     }
     return render(request, 'dairyapp/sellers.html', context)
 
@@ -681,6 +819,34 @@ def sellerUpdate(request, id):
         'seller': seller,
     }
     return render(request, 'dairyapp/seller-update.html', context)
+
+@login_required
+def buyerDelete(request, id):
+    buyer = get_object_or_404(Buyer, buyer_id=id)
+    buyer_name = buyer.buyer_name
+    buyer.delete()
+    messages.success(request, f'Buyer "{buyer_name}" deleted successfully.')
+    return redirect('/sellers/')
+
+@login_required
+def buyerUpdate(request, id):
+    buyer = get_object_or_404(Buyer, buyer_id=id)
+    
+    if request.method == 'POST':
+        form = BuyerForm(request.POST, instance=buyer)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Buyer updated successfully.')
+            return redirect('/sellers/')
+    else:
+        form = BuyerForm(instance=buyer)
+    
+    context = {
+        'title': 'Update Buyer',
+        'form': form,
+        'buyer': buyer,
+    }
+    return render(request, 'dairyapp/buyer-update.html', context)
 
 @login_required
 def test(request):
