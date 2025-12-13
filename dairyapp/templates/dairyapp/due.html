@@ -645,6 +645,7 @@
                                     <th>Date</th>
                                     <th>Type</th>
                                     <th>Person Name</th>
+                                    <th>Contact</th>
                                     <th>Particular</th>
                                     <th>Total</th>
                                     <th>Paid</th>
@@ -664,6 +665,7 @@
                                         {% endif %}
                                     </td>
                                     <td><strong>{{ due.person_name }}</strong></td>
+                                    <td>{% if due.contact_number %}{{ due.contact_number }}{% else %}-{% endif %}</td>
                                     <td>{{ due.particular }}</td>
                                     <td>NRs. {{ due.total_amount|floatformat:2 }}</td>
                                     <td>NRs. {{ due.paid_amount|floatformat:2 }}</td>
@@ -679,7 +681,7 @@
                                             <a href="{% url 'dairyapp:due-update' id=due.due_id %}" class="btn btn-sm btn-warning" title="Edit">
                                                 <i class="fa fa-edit"></i> Edit
                                             </a>
-                                            <button type="button" class="btn btn-sm btn-info" onclick="printDueRecord({{ due.due_id }})" title="Print">
+                                            <button type="button" class="btn btn-sm btn-info" onclick="printDueRecord({{ due.due_id }})" title="Print Receipt">
                                                 <i class="fa fa-print"></i> Print
                                             </button>
                                             <a href="{% url 'dairyapp:due-delete' id=due.due_id %}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this record?')" title="Delete">
@@ -690,7 +692,7 @@
                                 </tr>
                                 {% empty %}
                                 <tr>
-                                    <td colspan="8">
+                                    <td colspan="9">
                                         <div class="empty-state">
                                             <i class="fa fa-inbox"></i>
                                             <p>No due records found. Start by adding a new due record.</p>
@@ -740,6 +742,22 @@
                                     <span class="ticket-label">Name:</span>
                                     <span class="ticket-value-bold">{{ due.person_name }}</span>
                                 </div>
+                                
+                                {% if due.contact_number %}
+                                <div class="ticket-row">
+                                    <span class="ticket-label">Contact:</span>
+                                    <span class="ticket-value">{{ due.contact_number }}</span>
+                                </div>
+                                {% endif %}
+                                
+                                {% if due.address %}
+                                <div class="ticket-row">
+                                    <span class="ticket-label">Address:</span>
+                                    <span class="ticket-value-small">{{ due.address }}</span>
+                                </div>
+                                {% endif %}
+                                
+                                <div class="ticket-divider">--------------------------------</div>
                                 
                                 <div class="ticket-row">
                                     <span class="ticket-label">Particular:</span>

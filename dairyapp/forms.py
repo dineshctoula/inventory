@@ -721,6 +721,22 @@ class DueForm(forms.ModelForm):
         required=True
     )
     
+    contact_number = forms.CharField(
+        label='Contact Number',
+        max_length=20,
+        help_text="Enter contact phone number (optional)",
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        required=False
+    )
+    
+    address = forms.CharField(
+        label='Address',
+        max_length=200,
+        help_text="Enter address (optional)",
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        required=False
+    )
+    
     date = forms.DateField(
         label='Date',
         required=True,
@@ -775,7 +791,7 @@ class DueForm(forms.ModelForm):
     
     class Meta:
         model = Due
-        fields = ('due_type', 'person_name', 'date', 'particular', 'total_amount', 'paid_amount', 'remarks')
+        fields = ('due_type', 'person_name', 'contact_number', 'address', 'date', 'particular', 'total_amount', 'paid_amount', 'remarks')
 
 
 

@@ -476,6 +476,54 @@
                         {% endif %}
                     </div>
 
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>{{ form.contact_number.label }}</label>
+                                {% if form.is_bound %}
+                                    {% if form.contact_number.errors %}
+                                        {% render_field form.contact_number class="form-control is-invalid"%}
+                                        {% for error in form.contact_number.errors %}
+                                            <div class="invalid-feedback text-danger">
+                                                {{ error }}
+                                            </div>
+                                        {% endfor %}
+                                    {% else %}
+                                        {% render_field form.contact_number class="form-control is-valid" %}
+                                    {% endif %}
+                                {% else %}
+                                    {% render_field form.contact_number class="form-control" %}
+                                {% endif %}
+                                {% if form.contact_number.help_text %}
+                                    <small class="form-text text-muted">{{ form.contact_number.help_text }}</small>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>{{ form.address.label }}</label>
+                                {% if form.is_bound %}
+                                    {% if form.address.errors %}
+                                        {% render_field form.address class="form-control is-invalid"%}
+                                        {% for error in form.address.errors %}
+                                            <div class="invalid-feedback text-danger">
+                                                {{ error }}
+                                            </div>
+                                        {% endfor %}
+                                    {% else %}
+                                        {% render_field form.address class="form-control is-valid" %}
+                                    {% endif %}
+                                {% else %}
+                                    {% render_field form.address class="form-control" %}
+                                {% endif %}
+                                {% if form.address.help_text %}
+                                    <small class="form-text text-muted">{{ form.address.help_text }}</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="form-group">
                         <label>{{ form.particular.label }}</label>
                         {% if form.is_bound %}

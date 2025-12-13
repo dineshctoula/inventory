@@ -286,6 +286,8 @@ class Due(models.Model):
     due_id = models.AutoField(primary_key=True)
     due_type = models.CharField(max_length=10, choices=DUE_TYPE_CHOICES, default=CUSTOMER_DUE)
     person_name = models.CharField(max_length=100)
+    contact_number = models.CharField(max_length=20, blank=True, null=True, help_text="Contact phone number")
+    address = models.CharField(max_length=200, blank=True, null=True, help_text="Address of the person")
     date = models.DateField(blank=True, null=True, default=datetime.date.today)
     particular = models.CharField(max_length=200, help_text="Description or reason for due")
     total_amount = models.FloatField(default=0)
