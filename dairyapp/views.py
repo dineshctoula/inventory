@@ -32,8 +32,9 @@ def milkPurchase(request):
             ## gives object bound to form
             ## commit = False means it gives object that has not been saved in db yet
             ##m.mPurchase_date=timezone.now()
-            m.mPurchase_total=m.mPurchase_qty*m.mPurchase_rate
+            # All calculations are now done in the model's save() method
             m.save()
+            messages.success(request, 'Purchase record added successfully.')
             return redirect('/milkpurchase')
 
     else:
@@ -50,11 +51,52 @@ def milkPurchase(request):
     except EmptyPage:
         milk = paginator.page(paginator.num_pages)
 
+    # Calculate totals for current page
+    totals = {
+        'total_qty': sum([p.mPurchase_qty for p in milk if p.mPurchase_qty]),
+        'total_ts_amount': sum([p.ts_amount for p in milk if p.ts_amount]),
+        'total_amount': sum([p.mPurchase_total for p in milk if p.mPurchase_total]),
+        'total_advance': sum([p.advance_amount for p in milk if p.advance_amount]),
+    }
+    
+    # Calculate seller-wise advance tracking (all purchases, not just current page)
+    seller_advance_info = {}
+    all_purchases = mPurchase.objects.all()
+    for purchase in all_purchases:
+        seller = purchase.seller
+        if seller not in seller_advance_info:
+            seller_advance_info[seller] = {
+                'total_advance': 0,
+                'total_purchase': 0,
+                'remaining_balance': 0,
+            }
+        seller_advance_info[seller]['total_advance'] += purchase.advance_amount or 0
+        seller_advance_info[seller]['total_purchase'] += purchase.mPurchase_total or 0
+    
+    # Calculate remaining balance for each seller
+    # Remaining = Purchase Amount - Advance Given
+    # Positive = You still owe this amount to seller
+    # Negative = You overpaid (advance exceeds purchase)
+    for seller in seller_advance_info:
+        seller_advance_info[seller]['remaining_balance'] = (
+            seller_advance_info[seller]['total_purchase'] - 
+            seller_advance_info[seller]['total_advance']
+        )
+    
+    # Add remaining balance to each purchase object for easy template access
+    for purchase in milk:
+        seller = purchase.seller
+        if seller in seller_advance_info:
+            purchase.remaining_balance = seller_advance_info[seller]['remaining_balance']
+        else:
+            purchase.remaining_balance = 0
+
     context = {
         'title': title,
         'form': form,
-        'milk': milk
-
+        'milk': milk,
+        'totals': totals,
+        'seller_advance_info': seller_advance_info,
     }
 
     return render(request,'dairyapp/milk-purchase.html',context)

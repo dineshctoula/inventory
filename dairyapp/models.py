@@ -55,13 +55,72 @@ class mPurchase(models.Model):
     seller=models.CharField(max_length=50)
     mPurchase_date=models.DateField(blank=True,null=True)
     mPurchase_product=models.CharField(max_length=15,choices=MILK_CHOICES)
-    mPurchase_qty=models.FloatField()
-    mPurchase_rate=models.FloatField()
-    snf=models.FloatField(null=True, blank=True, help_text="Solid Not Fat percentage")
-    mPurchase_total=models.FloatField(default=0)
+    mPurchase_qty=models.FloatField(help_text="Quantity in Liters")
+    
+    # Summary rates (configurable, typically set per customer/month)
+    fat_rate_per_kg=models.FloatField(default=7.15, help_text="Fat Rate per kg")
+    snf_rate_per_kg=models.FloatField(default=4.55, help_text="SNF Rate per kg")
+    total_solids_per_kg=models.FloatField(default=10.0, help_text="Total Solids per kg (%)")
+    
+    # Input fields
+    fat=models.FloatField(null=True, blank=True, help_text="Fat percentage")
+    snf=models.FloatField(null=True, blank=True, help_text="SNF percentage")
+    ts=models.FloatField(null=True, blank=True, help_text="Total Solids")
+    
+    # Calculated fields
+    fat_per_kg=models.FloatField(null=True, blank=True, help_text="Fat per kg (calculated)")
+    snf_per_kg=models.FloatField(null=True, blank=True, help_text="SNF per kg (calculated)")
+    rate=models.FloatField(null=True, blank=True, help_text="Rate (fat_per_kg + snf_per_kg)")
+    ts_amount=models.FloatField(null=True, blank=True, help_text="TS Amount (ts * qty)")
+    rate_per_ltr=models.FloatField(null=True, blank=True, help_text="Rate per liter (ts + rate)")
+    
+    # Legacy fields (keeping for backward compatibility)
+    mPurchase_rate=models.FloatField(null=True, blank=True, help_text="Legacy rate field")
+    mPurchase_total=models.FloatField(default=0, help_text="Total Amount (rate_per_ltr * qty)")
+    
+    # Advance tracking fields
+    advance_amount=models.FloatField(default=0, help_text="Advance amount given to seller in this transaction")
 
     def __str__(self):
         return self.seller
+    
+    def save(self, *args, **kwargs):
+        # Calculate all derived fields
+        if self.fat is not None and self.fat_rate_per_kg is not None:
+            self.fat_per_kg = self.fat * self.fat_rate_per_kg
+        else:
+            self.fat_per_kg = None
+            
+        if self.snf is not None and self.snf_rate_per_kg is not None:
+            self.snf_per_kg = self.snf * self.snf_rate_per_kg
+        else:
+            self.snf_per_kg = None
+        
+        # Rate = fat_per_kg + snf_per_kg
+        if self.fat_per_kg is not None and self.snf_per_kg is not None:
+            self.rate = self.fat_per_kg + self.snf_per_kg
+        else:
+            self.rate = None
+        
+        # TS Amount = ts * qty
+        if self.ts is not None and self.mPurchase_qty is not None:
+            self.ts_amount = self.ts * self.mPurchase_qty
+        else:
+            self.ts_amount = None
+        
+        # Rate per liter = ts + rate
+        if self.ts is not None and self.rate is not None:
+            self.rate_per_ltr = self.ts + self.rate
+        else:
+            self.rate_per_ltr = None
+        
+        # Total Amount = rate_per_ltr * qty
+        if self.rate_per_ltr is not None and self.mPurchase_qty is not None:
+            self.mPurchase_total = self.rate_per_ltr * self.mPurchase_qty
+        else:
+            self.mPurchase_total = 0
+        
+        super().save(*args, **kwargs)
 
 ## Dairy Stock Add
 class mStock(models.Model):

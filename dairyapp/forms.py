@@ -31,22 +31,61 @@ class mPurchaseForm(forms.ModelForm):
     )
 
     mPurchase_qty=forms.FloatField(
-        label='Qty',
+        label='Qty (Liters)',
         help_text="The quantity must be in numeric format",
-
+        widget=forms.NumberInput(attrs={'step': '0.01', 'min': '0'})
     )
 
-    mPurchase_rate=forms.FloatField(
-        label='Rate/Ltr',
-        help_text="The rate should be in numeric format",
+    # Summary rates (configurable)
+    fat_rate_per_kg=forms.FloatField(
+        label='Fat Rate/kg',
+        initial=7.15,
+        help_text="Fat rate per kg",
+        widget=forms.NumberInput(attrs={'step': '0.01', 'min': '0'})
+    )
+    
+    snf_rate_per_kg=forms.FloatField(
+        label='SNF Rate/Kgs',
+        initial=4.55,
+        help_text="SNF rate per kg",
+        widget=forms.NumberInput(attrs={'step': '0.01', 'min': '0'})
+    )
+    
+    total_solids_per_kg=forms.FloatField(
+        label='Total Solids/Kgs (%)',
+        initial=10.0,
+        help_text="Total solids per kg percentage",
+        widget=forms.NumberInput(attrs={'step': '0.01', 'min': '0'})
+    )
 
+    # Input fields
+    fat=forms.FloatField(
+        label='Fat (%)',
+        required=False,
+        help_text="Fat percentage",
+        widget=forms.NumberInput(attrs={'step': '0.01', 'min': '0', 'max': '10'})
     )
 
     snf=forms.FloatField(
-        label='SNF',
+        label='SNF (%)',
         required=False,
         help_text="Solid Not Fat percentage",
         widget=forms.NumberInput(attrs={'step': '0.01', 'min': '0', 'max': '10'})
+    )
+    
+    ts=forms.FloatField(
+        label='TS (Total Solids)',
+        required=False,
+        help_text="Total Solids",
+        widget=forms.NumberInput(attrs={'step': '0.01', 'min': '0'})
+    )
+    
+    advance_amount=forms.FloatField(
+        label='Advance Amount (NRs)',
+        required=False,
+        initial=0,
+        help_text="Advance amount given to seller (optional)",
+        widget=forms.NumberInput(attrs={'step': '0.01', 'min': '0'})
     )
 
     def __init__(self, *args, **kwargs):
@@ -55,30 +94,54 @@ class mPurchaseForm(forms.ModelForm):
 
     class Meta:
         model=mPurchase
-        fields=('seller','mPurchase_date','mPurchase_product','mPurchase_qty','mPurchase_rate','snf',)
+        fields=('seller','mPurchase_date','mPurchase_product','mPurchase_qty',
+                'fat_rate_per_kg','snf_rate_per_kg','total_solids_per_kg',
+                'fat','snf','ts','advance_amount',)
 
     ## Negative Value Validations
     def clean(self):
         super(mPurchaseForm,self).clean()
         mPurchase_date = self.cleaned_data.get('mPurchase_date')
         mPurchase_qty = self.cleaned_data.get('mPurchase_qty')
-        mPurchase_rate=self.cleaned_data.get('mPurchase_rate')
-
 
         try:
             datetime.datetime.strptime(str(mPurchase_date), '%Y-%m-%d')
         except ValueError:
             self._errors['mPurchase_date'] = self.error_class(["Date should be in YYYY-mm-dd format"])
 
-        if(mPurchase_qty<0):
+        if mPurchase_qty is not None and mPurchase_qty < 0:
             self._errors['mPurchase_qty']=self.error_class(["Negative value not allowed"])
 
-        if(mPurchase_rate<0):
-            self._errors['mPurchase_rate'] = self.error_class(["Negative value not allowed"])
-
+        # Validate new fields
+        fat = self.cleaned_data.get('fat')
+        if fat is not None and fat < 0:
+            self._errors['fat'] = self.error_class(["Fat value cannot be negative"])
+        
         snf = self.cleaned_data.get('snf')
         if snf is not None and snf < 0:
             self._errors['snf'] = self.error_class(["SNF value cannot be negative"])
+        
+        ts = self.cleaned_data.get('ts')
+        if ts is not None and ts < 0:
+            self._errors['ts'] = self.error_class(["TS value cannot be negative"])
+        
+        fat_rate_per_kg = self.cleaned_data.get('fat_rate_per_kg')
+        if fat_rate_per_kg is not None and fat_rate_per_kg < 0:
+            self._errors['fat_rate_per_kg'] = self.error_class(["Fat rate cannot be negative"])
+        
+        snf_rate_per_kg = self.cleaned_data.get('snf_rate_per_kg')
+        if snf_rate_per_kg is not None and snf_rate_per_kg < 0:
+            self._errors['snf_rate_per_kg'] = self.error_class(["SNF rate cannot be negative"])
+        
+        total_solids_per_kg = self.cleaned_data.get('total_solids_per_kg')
+        if total_solids_per_kg is not None and total_solids_per_kg < 0:
+            self._errors['total_solids_per_kg'] = self.error_class(["Total solids rate cannot be negative"])
+        
+        advance_amount = self.cleaned_data.get('advance_amount')
+        if advance_amount is not None and advance_amount < 0:
+            self._errors['advance_amount'] = self.error_class(["Advance amount cannot be negative"])
+        if advance_amount is None:
+            self.cleaned_data['advance_amount'] = 0
 
         return self.cleaned_data
 
