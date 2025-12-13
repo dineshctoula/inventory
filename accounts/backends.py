@@ -17,7 +17,6 @@ class EmailBackend(ModelBackend):
         user = None
         try:
             user = User.objects.get(Q(email__iexact=email) | Q(username__iexact=email))
-(Q(email=email) | Q(username=email))
         except User.DoesNotExist:
             User().set_password(password)
             return None
