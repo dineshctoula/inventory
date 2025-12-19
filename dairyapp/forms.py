@@ -88,6 +88,14 @@ class mPurchaseForm(forms.ModelForm):
         help_text="Advance amount given to seller (optional)",
         widget=forms.NumberInput(attrs={'step': '0.01', 'min': '0'})
     )
+    
+    remarks=forms.CharField(
+        label='Remarks (Optional)',
+        required=False,
+        max_length=500,
+        help_text="Additional notes or remarks",
+        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3})
+    )
 
     def __init__(self, *args, **kwargs):
         super(mPurchaseForm, self).__init__(*args, **kwargs)
@@ -104,7 +112,7 @@ class mPurchaseForm(forms.ModelForm):
         model=mPurchase
         fields=('seller','mPurchase_date','mPurchase_qty',
                 'fat_rate_per_kg','snf_rate_per_kg','total_solids_per_kg',
-                'fat','snf','ts','advance_amount',)
+                'fat','snf','ts','advance_amount','remarks',)
 
     ## Negative Value Validations
     def clean(self):
@@ -306,6 +314,14 @@ class mProductSellForm(forms.ModelForm):
         help_text="Advance amount received from buyer (optional)",
         widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0'})
     )
+    
+    remarks=forms.CharField(
+        label='Remarks (Optional)',
+        required=False,
+        max_length=500,
+        help_text="Additional notes or remarks",
+        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3})
+    )
 
     def __init__(self, *args, **kwargs):
         super(mProductSellForm, self).__init__(*args, **kwargs)
@@ -359,7 +375,7 @@ class mProductSellForm(forms.ModelForm):
         model=mProductSell
         fields=('buyer_name','milk_product','mProductSell_date','mProductSell_qty',
                 'fat_rate_per_kg','snf_rate_per_kg','total_solids_per_kg',
-                'fat','snf','ts','advance_amount',)
+                'fat','snf','ts','advance_amount','remarks',)
 
 
 ## operation cost form

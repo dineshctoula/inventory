@@ -316,6 +316,7 @@
                             <th>Total Amount</th>
                             <th>Advance</th>
                             <th>Remaining</th>
+                            <th>Remarks</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -340,6 +341,9 @@
                                     {{ purchase.remaining_balance|floatformat:2 }}
                                 </span>
                             </td>
+                            <td style="max-width: 150px; word-wrap: break-word; font-size: 11px;">
+                                {% if purchase.remarks %}{{ purchase.remarks|truncatewords:10 }}{% else %}-{% endif %}
+                            </td>
                             <td>
                                 <button type="button" class="btn btn-info btn-sm print-purchase-btn" data-purchase-id="{{ purchase.mPurchase_id }}" title="Print">
                                     <i class="fa fa-print"></i> Print
@@ -361,6 +365,7 @@
                             <td><strong>{{ totals.total_amount|floatformat:2 }}</strong></td>
                             <td><strong>{{ totals.total_advance|floatformat:2 }}</strong></td>
                             <td><strong>{{ totals.total_remaining|floatformat:2 }}</strong></td>
+                            <td>-</td>
                             <td></td>
                         </tr>
                         {% endif %}
@@ -409,6 +414,7 @@
                             <th>Total Amount</th>
                             <th>Advance</th>
                             <th>Remaining</th>
+                            <th>Remarks</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -434,6 +440,9 @@
                                     {{ sale.remaining_balance|floatformat:2 }}
                                 </span>
                             </td>
+                            <td style="max-width: 150px; word-wrap: break-word; font-size: 11px;">
+                                {% if sale.remarks %}{{ sale.remarks|truncatewords:10 }}{% else %}-{% endif %}
+                            </td>
                             <td>
                                 <button type="button" class="btn btn-info btn-sm print-sale-btn" data-sale-id="{{ sale.mProductSell_id }}" title="Print">
                                     <i class="fa fa-print"></i> Print
@@ -455,6 +464,7 @@
                             <td><strong>{{ totals.total_amount|floatformat:2 }}</strong></td>
                             <td><strong>{{ totals.total_advance|floatformat:2 }}</strong></td>
                             <td><strong>{{ totals.total_remaining|floatformat:2 }}</strong></td>
+                            <td>-</td>
                             <td></td>
                         </tr>
                         {% endif %}
@@ -736,6 +746,14 @@
                 <span class="ticket-value">NRs. {{ purchase.advance_amount|floatformat:2 }}</span>
             </div>
             {% endif %}
+            
+            {% if purchase.remarks %}
+            <div class="ticket-divider">--------------------------------</div>
+            <div class="ticket-row">
+                <span class="ticket-label">Remarks:</span>
+                <span class="ticket-value-small">{{ purchase.remarks }}</span>
+            </div>
+            {% endif %}
         </div>
         
         <div class="ticket-divider">--------------------------------</div>
@@ -796,6 +814,14 @@
             <div class="ticket-row">
                 <span class="ticket-label">Advance:</span>
                 <span class="ticket-value">NRs. {{ sale.advance_amount|floatformat:2 }}</span>
+            </div>
+            {% endif %}
+            
+            {% if sale.remarks %}
+            <div class="ticket-divider">--------------------------------</div>
+            <div class="ticket-row">
+                <span class="ticket-label">Remarks:</span>
+                <span class="ticket-value-small">{{ sale.remarks }}</span>
             </div>
             {% endif %}
         </div>
@@ -934,6 +960,11 @@
                     text-align: right;
                     font-weight: bold;
                 }
+                .ticket-value-small {
+                    text-align: right;
+                    flex: 1;
+                    font-size: 9px;
+                }
                 .ticket-footer {
                     text-align: center;
                     font-size: 9px;
@@ -1020,6 +1051,11 @@
                 .ticket-value-bold {
                     text-align: right;
                     font-weight: bold;
+                }
+                .ticket-value-small {
+                    text-align: right;
+                    flex: 1;
+                    font-size: 9px;
                 }
                 .ticket-footer {
                     text-align: center;

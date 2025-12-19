@@ -114,6 +114,7 @@
                     <th>Total Amount</th>
                     <th>Advance</th>
                     <th>Remaining</th>
+                    <th>Remarks</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
@@ -140,6 +141,9 @@
                                     {{ purchase.remaining_balance|floatformat:2 }}
                                 </span>
                             </td>
+                            <td style="max-width: 150px; word-wrap: break-word; font-size: 11px;">
+                                {% if purchase.remarks %}{{ purchase.remarks|truncatewords:10 }}{% else %}-{% endif %}
+                            </td>
                             <td>
                                 <div style="display: flex; gap: 5px;">
                                     <button type="button" class="btn btn-info btn-sm" onclick="printPurchaseRecord({{ purchase.mPurchase_id }})" title="Print">
@@ -164,6 +168,7 @@
                         <td>-</td>
                         <td><strong>{{ totals.total_amount|floatformat:2 }}</strong></td>
                         <td><strong>{{ totals.total_advance|floatformat:2 }}</strong></td>
+                        <td>-</td>
                         <td>-</td>
                         <td></td>
                     </tr>
@@ -315,6 +320,14 @@
                     <span class="ticket-label">Total Amount:</span>
                     <span class="ticket-value-balance">NRs. {{ purchase.mPurchase_total|floatformat:2 }}</span>
                 </div>
+                
+                {% if purchase.remarks %}
+                <div class="ticket-divider">--------------------------------</div>
+                <div class="ticket-row">
+                    <span class="ticket-label">Remarks:</span>
+                    <span class="ticket-value-small">{{ purchase.remarks }}</span>
+                </div>
+                {% endif %}
             </div>
             
             <div class="ticket-divider">--------------------------------</div>

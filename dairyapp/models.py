@@ -122,6 +122,9 @@ class mPurchase(models.Model):
     
     # Advance tracking fields
     advance_amount=models.FloatField(default=0, help_text="Advance amount given to seller in this transaction")
+    
+    # Remarks field
+    remarks=models.TextField(max_length=500, blank=True, null=True, help_text="Additional remarks or notes")
 
     def __str__(self):
         return self.seller
@@ -210,6 +213,9 @@ class mProductSell(models.Model):
     
     # Advance tracking fields
     advance_amount=models.FloatField(default=0, help_text="Advance amount received from buyer")
+    
+    # Remarks field
+    remarks=models.TextField(max_length=500, blank=True, null=True, help_text="Additional remarks or notes")
 
     def __str__(self):
         return self.buyer_name
