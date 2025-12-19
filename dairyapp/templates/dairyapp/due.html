@@ -647,6 +647,8 @@
                                     <th>Person Name</th>
                                     <th>Contact</th>
                                     <th>Particular</th>
+                                    <th>Rate</th>
+                                    <th>Quantity</th>
                                     <th>Total</th>
                                     <th>Paid</th>
                                     <th>Balance</th>
@@ -667,6 +669,8 @@
                                     <td><strong>{{ due.person_name }}</strong></td>
                                     <td>{% if due.contact_number %}{{ due.contact_number }}{% else %}-{% endif %}</td>
                                     <td>{{ due.particular }}</td>
+                                    <td>{% if due.rate %}{{ due.rate|floatformat:2 }}{% else %}-{% endif %}</td>
+                                    <td>{% if due.quantity %}{{ due.quantity|floatformat:2 }}{% else %}-{% endif %}</td>
                                     <td>NRs. {{ due.total_amount|floatformat:2 }}</td>
                                     <td>NRs. {{ due.paid_amount|floatformat:2 }}</td>
                                     <td>
@@ -692,7 +696,7 @@
                                 </tr>
                                 {% empty %}
                                 <tr>
-                                    <td colspan="9">
+                                    <td colspan="11">
                                         <div class="empty-state">
                                             <i class="fa fa-inbox"></i>
                                             <p>No due records found. Start by adding a new due record.</p>
@@ -763,6 +767,24 @@
                                     <span class="ticket-label">Particular:</span>
                                     <span class="ticket-value-small">{{ due.particular }}</span>
                                 </div>
+                                
+                                {% if due.rate or due.quantity %}
+                                <div class="ticket-divider">--------------------------------</div>
+                                
+                                {% if due.rate %}
+                                <div class="ticket-row">
+                                    <span class="ticket-label">Rate:</span>
+                                    <span class="ticket-value">NRs. {{ due.rate|floatformat:2 }}</span>
+                                </div>
+                                {% endif %}
+                                
+                                {% if due.quantity %}
+                                <div class="ticket-row">
+                                    <span class="ticket-label">Quantity:</span>
+                                    <span class="ticket-value">{{ due.quantity|floatformat:2 }}</span>
+                                </div>
+                                {% endif %}
+                                {% endif %}
                                 
                                 <div class="ticket-divider">--------------------------------</div>
                                 

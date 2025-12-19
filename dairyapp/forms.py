@@ -767,6 +767,22 @@ class DueForm(forms.ModelForm):
         required=True
     )
     
+    rate = forms.FloatField(
+        label='Rate (NRs)',
+        help_text="Enter rate per unit (optional)",
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+        required=False,
+        initial=0
+    )
+    
+    quantity = forms.FloatField(
+        label='Quantity',
+        help_text="Enter quantity (optional)",
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+        required=False,
+        initial=0
+    )
+    
     total_amount = forms.FloatField(
         label='Total Amount (NRs)',
         help_text="Enter total amount",
@@ -807,7 +823,7 @@ class DueForm(forms.ModelForm):
     
     class Meta:
         model = Due
-        fields = ('due_type', 'person_name', 'contact_number', 'address', 'date', 'particular', 'total_amount', 'paid_amount', 'remarks')
+        fields = ('due_type', 'person_name', 'contact_number', 'address', 'date', 'particular', 'rate', 'quantity', 'total_amount', 'paid_amount', 'remarks')
 
 
 

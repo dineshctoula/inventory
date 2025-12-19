@@ -296,6 +296,8 @@ class Due(models.Model):
     address = models.CharField(max_length=200, blank=True, null=True, help_text="Address of the person")
     date = models.DateField(blank=True, null=True, default=datetime.date.today)
     particular = models.CharField(max_length=200, help_text="Description or reason for due")
+    rate = models.FloatField(default=0, blank=True, null=True, help_text="Rate per unit")
+    quantity = models.FloatField(default=0, blank=True, null=True, help_text="Quantity")
     total_amount = models.FloatField(default=0)
     paid_amount = models.FloatField(default=0)
     balance_amount = models.FloatField(default=0)
