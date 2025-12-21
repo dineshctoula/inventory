@@ -537,6 +537,29 @@ def monthlyReport(request):
                     'total_solids_per_kg': 10.0,
                 }
     
+    # Get seller and buyer objects with addresses
+    seller_obj = None
+    buyer_obj = None
+    seller_address = None
+    buyer_address = None
+    
+    final_seller_name = seller_name or selected_seller
+    final_buyer_name = buyer_name or selected_buyer
+    
+    if final_seller_name:
+        try:
+            seller_obj = Seller.objects.get(seller_name=final_seller_name)
+            seller_address = seller_obj.seller_address
+        except Seller.DoesNotExist:
+            pass
+    
+    if final_buyer_name:
+        try:
+            buyer_obj = Buyer.objects.get(buyer_name=final_buyer_name)
+            buyer_address = buyer_obj.buyer_address
+        except Buyer.DoesNotExist:
+            pass
+    
     nepali_month_name = None
     nepali_year = None
     if month and year:
@@ -561,8 +584,10 @@ def monthlyReport(request):
         'purchases': purchases,
         'sales': sales,
         'report_type': report_type,
-        'seller_name': seller_name or selected_seller,
-        'buyer_name': buyer_name or selected_buyer,
+        'seller_name': final_seller_name,
+        'buyer_name': final_buyer_name,
+        'seller_address': seller_address,
+        'buyer_address': buyer_address,
         'month': month,
         'year': year,
         'report_date': report_date,

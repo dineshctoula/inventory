@@ -36,3 +36,10 @@ Thumbs.db
 # Commit messages
 COMMIT_MESSAGE.txt
 commit_message.txt
+
+
+# SQLite databases
+*.sqlite3
+*.sqlite
+*.db
+*.db-journal

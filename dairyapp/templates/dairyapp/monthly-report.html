@@ -517,7 +517,9 @@
         <!-- <div class="pan-number">PAN: 301418625</div> -->
         <div class="party-info">
             <div class="party-name">PARTY'S NAME:-{{ seller_name }}</div>
-            <!-- <div class="party-address">Address:- </div> -->
+            {% if seller_address %}
+            <div class="party-address">Address:- {{ seller_address }}</div>
+            {% endif %}
             <div class="summary-box">
                 <div class="summary-row">
                     <span class="summary-label">Fat Rate/kg:</span>
@@ -610,7 +612,9 @@
         <!-- <div class="pan-number">PAN: 301418625</div> -->
         <div class="party-info">
             <div class="party-name">PARTY'S NAME:-{{ buyer_name }}</div>
-            <!-- <div class="party-address">District Jhapa ,Nepal</div> -->
+            {% if buyer_address %}
+            <div class="party-address">Address:- {{ buyer_address }}</div>
+            {% endif %}
             <div class="summary-box">
                 <div class="summary-row">
                     <span class="summary-label">Fat Rate/kg:</span>
