@@ -227,8 +227,8 @@
     <div id="printContent-{{ purchase.mPurchase_id }}" class="print-content" style="display: none;">
         <div class="ticket-slip">
             <div class="ticket-header">
-                <div class="ticket-title">MILK PURCHASE RECEIPT</div>
-                <div class="ticket-subtitle">Dairy Management System</div>
+                <div class="ticket-title">प्रेक्षा प्रशिक्षा दूध डेरी</div>
+                <div class="ticket-subtitle">RECEIPT</div>
             </div>
             
             <div class="ticket-divider">--------------------------------</div>
@@ -303,7 +303,7 @@
                 {% if purchase.ts_amount %}
                 <div class="ticket-row">
                     <span class="ticket-label">TS Amount:</span>
-                    <span class="ticket-value">NRs. {{ purchase.ts_amount|floatformat:2 }}</span>
+                    <span class="ticket-value">NRs. {{ purchase.ts_amount|floatformat:4 }}</span>
                 </div>
                 {% endif %}
                 
