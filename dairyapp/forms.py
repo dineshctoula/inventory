@@ -78,7 +78,7 @@ class mPurchaseForm(forms.ModelForm):
         label='TS (Total Solids)',
         required=False,
         help_text="Total Solids",
-        widget=forms.NumberInput(attrs={'step': '0.01', 'min': '0'})
+        widget=forms.NumberInput(attrs={'step': '0.0001', 'min': '0'})
     )
     
     advance_amount=forms.FloatField(
@@ -304,7 +304,7 @@ class mProductSellForm(forms.ModelForm):
         label='TS (Total Solids)',
         required=False,
         help_text="Total Solids",
-        widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0'})
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '0.0001', 'min': '0'})
     )
     
     advance_amount=forms.FloatField(
