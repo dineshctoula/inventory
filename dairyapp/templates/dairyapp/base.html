@@ -86,6 +86,14 @@
             max-width: calc(100% - 40px);
         }
         
+        /* Hide any duplicate message displays at bottom */
+        .wrapper .messages,
+        .wrapper .alert:not(.toast-message),
+        #main-content .messages,
+        #main-content .alert:not(.toast-message) {
+            display: none !important;
+        }
+        
         .toast-message {
             background: white;
             border-radius: 8px;

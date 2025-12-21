@@ -76,12 +76,11 @@ def milkPurchase(request):
             seller_advance_info[seller]['total_advance']
         )
     
+    # Calculate remaining balance for each purchase (total amount - advance for that transaction)
     for purchase in milk:
-        seller = purchase.seller
-        if seller in seller_advance_info:
-            purchase.remaining_balance = seller_advance_info[seller]['remaining_balance']
-        else:
-            purchase.remaining_balance = 0
+        purchase_total = purchase.mPurchase_total or 0
+        advance = purchase.advance_amount or 0
+        purchase.remaining_balance = purchase_total - advance
 
     context = {
         'title': title,
@@ -211,12 +210,11 @@ def sellMilkProducts(request):
             buyer_advance_info[buyer]['total_advance']
         )
     
+    # Calculate remaining balance for each sale (total amount - advance for that transaction)
     for sale in sales:
-        buyer = sale.buyer_name
-        if buyer in buyer_advance_info:
-            sale.remaining_balance = buyer_advance_info[buyer]['remaining_balance']
-        else:
-            sale.remaining_balance = 0
+        sale_amount = sale.mProductSell_amount or 0
+        advance = sale.advance_amount or 0
+        sale.remaining_balance = sale_amount - advance
 
     context={
         'title':title,
