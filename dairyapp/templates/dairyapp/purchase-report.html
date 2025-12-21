@@ -104,7 +104,6 @@
                   <tr class="bg-success">
                     <th>Date</th>
                     <th>Seller</th>
-                    <th>Milk Type</th>
                     <th>QTY (ltr)</th>
                     <th>Rate</th>
                     <th>SNF</th>
@@ -120,7 +119,6 @@
                             <!-- template tag to convert AD into BS -->
                             <td>{{ purchase.mPurchase_date |date:"Y-m-d" }}</td>
                             <td>{{purchase.seller  }}</td>
-                            <td>{{purchase.mPurchase_product}}</td>
                             <td>{{purchase.mPurchase_qty}}</td>
                             <td>{{purchase.mPurchase_rate}}</td>
                             <td>{% if purchase.snf %}{{ purchase.snf|floatformat:2 }}{% else %}-{% endif %}</td>

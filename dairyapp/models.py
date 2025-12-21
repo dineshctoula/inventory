@@ -122,6 +122,9 @@ class mPurchase(models.Model):
     
     # Advance tracking fields
     advance_amount=models.FloatField(default=0, help_text="Advance amount given to seller in this transaction")
+    
+    # Remarks field
+    remarks=models.TextField(max_length=500, blank=True, null=True, help_text="Additional remarks or notes")
 
     def __str__(self):
         return self.seller
@@ -210,6 +213,9 @@ class mProductSell(models.Model):
     
     # Advance tracking fields
     advance_amount=models.FloatField(default=0, help_text="Advance amount received from buyer")
+    
+    # Remarks field
+    remarks=models.TextField(max_length=500, blank=True, null=True, help_text="Additional remarks or notes")
 
     def __str__(self):
         return self.buyer_name
@@ -286,8 +292,12 @@ class Due(models.Model):
     due_id = models.AutoField(primary_key=True)
     due_type = models.CharField(max_length=10, choices=DUE_TYPE_CHOICES, default=CUSTOMER_DUE)
     person_name = models.CharField(max_length=100)
+    contact_number = models.CharField(max_length=20, blank=True, null=True, help_text="Contact phone number")
+    address = models.CharField(max_length=200, blank=True, null=True, help_text="Address of the person")
     date = models.DateField(blank=True, null=True, default=datetime.date.today)
     particular = models.CharField(max_length=200, help_text="Description or reason for due")
+    rate = models.FloatField(default=0, blank=True, null=True, help_text="Rate per unit")
+    quantity = models.FloatField(default=0, blank=True, null=True, help_text="Quantity")
     total_amount = models.FloatField(default=0)
     paid_amount = models.FloatField(default=0)
     balance_amount = models.FloatField(default=0)

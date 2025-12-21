@@ -114,6 +114,7 @@
                     <th>Total Amount</th>
                     <th>Advance</th>
                     <th>Remaining</th>
+                    <th>Remarks</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
@@ -140,6 +141,9 @@
                                     {{ purchase.remaining_balance|floatformat:2 }}
                                 </span>
                             </td>
+                            <td style="max-width: 150px; word-wrap: break-word; font-size: 11px;">
+                                {% if purchase.remarks %}{{ purchase.remarks|truncatewords:10 }}{% else %}-{% endif %}
+                            </td>
                             <td>
                                 <div style="display: flex; gap: 5px;">
                                     <button type="button" class="btn btn-info btn-sm" onclick="printPurchaseRecord({{ purchase.mPurchase_id }})" title="Print">
@@ -164,6 +168,7 @@
                         <td>-</td>
                         <td><strong>{{ totals.total_amount|floatformat:2 }}</strong></td>
                         <td><strong>{{ totals.total_advance|floatformat:2 }}</strong></td>
+                        <td>-</td>
                         <td>-</td>
                         <td></td>
                     </tr>
@@ -222,8 +227,8 @@
     <div id="printContent-{{ purchase.mPurchase_id }}" class="print-content" style="display: none;">
         <div class="ticket-slip">
             <div class="ticket-header">
-                <div class="ticket-title">MILK PURCHASE RECEIPT</div>
-                <div class="ticket-subtitle">Dairy Management System</div>
+                <div class="ticket-title">प्रेक्षा प्रशिक्षा दूध डेरी</div>
+                <div class="ticket-subtitle">RECEIPT</div>
             </div>
             
             <div class="ticket-divider">--------------------------------</div>
@@ -244,11 +249,6 @@
                 <div class="ticket-row highlight">
                     <span class="ticket-label">Seller:</span>
                     <span class="ticket-value-bold">{{ purchase.seller }}</span>
-                </div>
-                
-                <div class="ticket-row">
-                    <span class="ticket-label">Milk Type:</span>
-                    <span class="ticket-value">{{ purchase.mPurchase_product }}</span>
                 </div>
                 
                 <div class="ticket-divider">--------------------------------</div>
@@ -303,7 +303,7 @@
                 {% if purchase.ts_amount %}
                 <div class="ticket-row">
                     <span class="ticket-label">TS Amount:</span>
-                    <span class="ticket-value">NRs. {{ purchase.ts_amount|floatformat:2 }}</span>
+                    <span class="ticket-value">NRs. {{ purchase.ts_amount|floatformat:4 }}</span>
                 </div>
                 {% endif %}
                 
@@ -320,6 +320,14 @@
                     <span class="ticket-label">Total Amount:</span>
                     <span class="ticket-value-balance">NRs. {{ purchase.mPurchase_total|floatformat:2 }}</span>
                 </div>
+                
+                {% if purchase.remarks %}
+                <div class="ticket-divider">--------------------------------</div>
+                <div class="ticket-row">
+                    <span class="ticket-label">Remarks:</span>
+                    <span class="ticket-value-small">{{ purchase.remarks }}</span>
+                </div>
+                {% endif %}
             </div>
             
             <div class="ticket-divider">--------------------------------</div>

@@ -105,6 +105,7 @@
                     <th>Total Amount</th>
                     <th>Advance</th>
                     <th>Remaining</th>
+                    <th>Remarks</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
@@ -132,6 +133,9 @@
                                     {{ sale.remaining_balance|floatformat:2 }}
                                 </span>
                             </td>
+                            <td style="max-width: 150px; word-wrap: break-word; font-size: 11px;">
+                                {% if sale.remarks %}{{ sale.remarks|truncatewords:10 }}{% else %}-{% endif %}
+                            </td>
                             <td>
                                 <div style="display: flex; gap: 5px;">
                                     <button type="button" class="btn btn-info btn-sm print-sale-btn" data-sale-id="{{ sale.mProductSell_id }}" title="Print">
@@ -156,6 +160,7 @@
                         <td>-</td>
                         <td><strong>{{ totals.total_amount|floatformat:2 }}</strong></td>
                         <td><strong>{{ totals.total_advance|floatformat:2 }}</strong></td>
+                        <td>-</td>
                         <td>-</td>
                         <td></td>
                     </tr>
@@ -208,8 +213,8 @@
     <div id="printContent-{{ sale.mProductSell_id }}" class="print-content" style="display: none;">
         <div class="ticket-slip">
             <div class="ticket-header">
-                <div class="ticket-title">MILK SALE RECEIPT</div>
-                <div class="ticket-subtitle">Preksha-prasikshya doodh dairy</div>
+                <div class="ticket-title">प्रेक्षा प्रशिक्षा दूध डेरी</div>
+                <div class="ticket-subtitle"> RECEIPT</div>
             </div>
             
             <div class="ticket-divider">--------------------------------</div>
@@ -309,6 +314,14 @@
                 <div class="ticket-row">
                     <span class="ticket-label">Advance:</span>
                     <span class="ticket-value">NRs. {{ sale.advance_amount|floatformat:2 }}</span>
+                </div>
+                {% endif %}
+                
+                {% if sale.remarks %}
+                <div class="ticket-divider">--------------------------------</div>
+                <div class="ticket-row">
+                    <span class="ticket-label">Remarks:</span>
+                    <span class="ticket-value-small">{{ sale.remarks }}</span>
                 </div>
                 {% endif %}
             </div>

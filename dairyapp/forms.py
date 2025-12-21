@@ -30,14 +30,6 @@ class mPurchaseForm(forms.ModelForm):
         #input_formats=['%Y-%m-%d'],
     )
 
-    mPurchase_product=forms.ChoiceField(
-        choices=MILK_CHOICES,
-        label='Milk Type',
-        initial='',
-        widget=forms.Select(),
-        help_text="Choose milk type from options",
-        required=True
-    )
 
     mPurchase_qty=forms.FloatField(
         label='Qty (Liters)',
@@ -96,6 +88,14 @@ class mPurchaseForm(forms.ModelForm):
         help_text="Advance amount given to seller (optional)",
         widget=forms.NumberInput(attrs={'step': '0.01', 'min': '0'})
     )
+    
+    remarks=forms.CharField(
+        label='Remarks (Optional)',
+        required=False,
+        max_length=500,
+        help_text="Additional notes or remarks",
+        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3})
+    )
 
     def __init__(self, *args, **kwargs):
         super(mPurchaseForm, self).__init__(*args, **kwargs)
@@ -110,9 +110,9 @@ class mPurchaseForm(forms.ModelForm):
 
     class Meta:
         model=mPurchase
-        fields=('seller','mPurchase_date','mPurchase_product','mPurchase_qty',
+        fields=('seller','mPurchase_date','mPurchase_qty',
                 'fat_rate_per_kg','snf_rate_per_kg','total_solids_per_kg',
-                'fat','snf','ts','advance_amount',)
+                'fat','snf','ts','advance_amount','remarks',)
 
     ## Negative Value Validations
     def clean(self):
@@ -158,6 +158,11 @@ class mPurchaseForm(forms.ModelForm):
             self._errors['advance_amount'] = self.error_class(["Advance amount cannot be negative"])
         if advance_amount is None:
             self.cleaned_data['advance_amount'] = 0
+
+        # Set default milk type if not provided
+        if 'mPurchase_product' not in self.cleaned_data:
+            from dairyapp.choices import Cow
+            self.cleaned_data['mPurchase_product'] = Cow
 
         return self.cleaned_data
 
@@ -309,6 +314,14 @@ class mProductSellForm(forms.ModelForm):
         help_text="Advance amount received from buyer (optional)",
         widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0'})
     )
+    
+    remarks=forms.CharField(
+        label='Remarks (Optional)',
+        required=False,
+        max_length=500,
+        help_text="Additional notes or remarks",
+        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3})
+    )
 
     def __init__(self, *args, **kwargs):
         super(mProductSellForm, self).__init__(*args, **kwargs)
@@ -362,7 +375,7 @@ class mProductSellForm(forms.ModelForm):
         model=mProductSell
         fields=('buyer_name','milk_product','mProductSell_date','mProductSell_qty',
                 'fat_rate_per_kg','snf_rate_per_kg','total_solids_per_kg',
-                'fat','snf','ts','advance_amount',)
+                'fat','snf','ts','advance_amount','remarks',)
 
 
 ## operation cost form
@@ -724,6 +737,22 @@ class DueForm(forms.ModelForm):
         required=True
     )
     
+    contact_number = forms.CharField(
+        label='Contact Number',
+        max_length=20,
+        help_text="Enter contact phone number (optional)",
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        required=False
+    )
+    
+    address = forms.CharField(
+        label='Address',
+        max_length=200,
+        help_text="Enter address (optional)",
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        required=False
+    )
+    
     date = forms.DateField(
         label='Date',
         required=True,
@@ -736,6 +765,22 @@ class DueForm(forms.ModelForm):
         help_text="Enter description or reason for due",
         widget=forms.TextInput(attrs={'class': 'form-control'}),
         required=True
+    )
+    
+    rate = forms.FloatField(
+        label='Rate (NRs)',
+        help_text="Enter rate per unit (optional)",
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+        required=False,
+        initial=0
+    )
+    
+    quantity = forms.FloatField(
+        label='Quantity',
+        help_text="Enter quantity (optional)",
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+        required=False,
+        initial=0
     )
     
     total_amount = forms.FloatField(
@@ -778,7 +823,7 @@ class DueForm(forms.ModelForm):
     
     class Meta:
         model = Due
-        fields = ('due_type', 'person_name', 'date', 'particular', 'total_amount', 'paid_amount', 'remarks')
+        fields = ('due_type', 'person_name', 'contact_number', 'address', 'date', 'particular', 'rate', 'quantity', 'total_amount', 'paid_amount', 'remarks')
 
 
 

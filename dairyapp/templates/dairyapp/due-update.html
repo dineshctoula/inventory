@@ -476,6 +476,54 @@
                         {% endif %}
                     </div>
 
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>{{ form.contact_number.label }}</label>
+                                {% if form.is_bound %}
+                                    {% if form.contact_number.errors %}
+                                        {% render_field form.contact_number class="form-control is-invalid"%}
+                                        {% for error in form.contact_number.errors %}
+                                            <div class="invalid-feedback text-danger">
+                                                {{ error }}
+                                            </div>
+                                        {% endfor %}
+                                    {% else %}
+                                        {% render_field form.contact_number class="form-control is-valid" %}
+                                    {% endif %}
+                                {% else %}
+                                    {% render_field form.contact_number class="form-control" %}
+                                {% endif %}
+                                {% if form.contact_number.help_text %}
+                                    <small class="form-text text-muted">{{ form.contact_number.help_text }}</small>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>{{ form.address.label }}</label>
+                                {% if form.is_bound %}
+                                    {% if form.address.errors %}
+                                        {% render_field form.address class="form-control is-invalid"%}
+                                        {% for error in form.address.errors %}
+                                            <div class="invalid-feedback text-danger">
+                                                {{ error }}
+                                            </div>
+                                        {% endfor %}
+                                    {% else %}
+                                        {% render_field form.address class="form-control is-valid" %}
+                                    {% endif %}
+                                {% else %}
+                                    {% render_field form.address class="form-control" %}
+                                {% endif %}
+                                {% if form.address.help_text %}
+                                    <small class="form-text text-muted">{{ form.address.help_text }}</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="form-group">
                         <label>{{ form.particular.label }}</label>
                         {% if form.is_bound %}
@@ -500,6 +548,54 @@
 
                 <div class="form-section">
                     <div class="form-section-title">Amount Details</div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>{{ form.rate.label }}</label>
+                                {% if form.is_bound %}
+                                    {% if form.rate.errors %}
+                                        {% render_field form.rate class="form-control is-invalid" id="id_rate"%}
+                                        {% for error in form.rate.errors %}
+                                            <div class="invalid-feedback text-danger">
+                                                {{ error }}
+                                            </div>
+                                        {% endfor %}
+                                    {% else %}
+                                        {% render_field form.rate class="form-control is-valid" id="id_rate"%}
+                                    {% endif %}
+                                {% else %}
+                                    {% render_field form.rate class="form-control" id="id_rate"%}
+                                {% endif %}
+                                {% if form.rate.help_text %}
+                                    <small class="form-text text-muted">{{ form.rate.help_text }}</small>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>{{ form.quantity.label }}</label>
+                                {% if form.is_bound %}
+                                    {% if form.quantity.errors %}
+                                        {% render_field form.quantity class="form-control is-invalid" id="id_quantity"%}
+                                        {% for error in form.quantity.errors %}
+                                            <div class="invalid-feedback text-danger">
+                                                {{ error }}
+                                            </div>
+                                        {% endfor %}
+                                    {% else %}
+                                        {% render_field form.quantity class="form-control is-valid" id="id_quantity"%}
+                                    {% endif %}
+                                {% else %}
+                                    {% render_field form.quantity class="form-control" id="id_quantity"%}
+                                {% endif %}
+                                {% if form.quantity.help_text %}
+                                    <small class="form-text text-muted">{{ form.quantity.help_text }}</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
                     
                     <div class="row">
                         <div class="col-md-6">
